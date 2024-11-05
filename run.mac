@@ -1,0 +1,20 @@
+
+/run/initialize
+/gun/momentumAmp 0.5 GeV
+/run/beamOn 10000
+
+/run/initialize
+/gun/momentumAmp 1 GeV
+/run/beamOn 10000
+
+/run/initialize
+/gun/momentumAmp 5 GeV
+/run/beamOn 10000
+
+/run/initialize
+/gun/momentumAmp 10 GeV
+/run/beamOn 10000
+
+/run/initialize
+/gun/momentumAmp 50 GeV
+/run/beamOn 10000

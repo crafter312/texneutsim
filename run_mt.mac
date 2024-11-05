@@ -1,0 +1,17 @@
+/run/numberOfThreads 2
+/run/initialize
+
+/gun/momentumAmp 0.1 GeV
+/run/beamOn 10000
+
+/gun/momentumAmp 0.5 GeV
+/run/beamOn 10000
+
+/gun/momentumAmp 1 GeV
+/run/beamOn 10000
+
+/gun/momentumAmp 5 GeV
+/run/beamOn 10000
+
+/gun/momentumAmp 10 GeV
+/run/beamOn 10000
