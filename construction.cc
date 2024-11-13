@@ -156,7 +156,7 @@ void MyDetectorConstruction::DefineMaterials()
   pTerp_mt->AddProperty("SLOWCOMPONENT", pterp_Energy, pterp_SCINT, pterpnum);
   pTerp_mt->AddProperty("RINDEX",        pterp_Energy, pterp_RIND,  pterpnum);
   pTerp_mt->AddProperty("ABSLENGTH",     pterp_Energy, pterp_ABSL,  pterpnum);
-  pTerp_mt->AddConstProperty("SCINTILLATIONYIELD",60000./MeV);
+  pTerp_mt->AddConstProperty("SCINTILLATIONYIELD",0./MeV);
   pTerp_mt->AddConstProperty("RESOLUTIONSCALE",1.0);
   pTerp_mt->AddConstProperty("FASTTIMECONSTANT",3.3*ns);
   pTerp_mt->AddConstProperty("SLOWTIMECONSTANT",31.*ns);
@@ -270,7 +270,7 @@ void MyDetectorConstruction::ConstructScintillator()
   G4double housing_y = fScint_y+2.*fD_mtl;
   G4double housing_z = fScint_z+2.*fD_mtl;
 
-  checkGeometry = false;
+  checkGeometry = true;
  
 
   ///////////////////////////// Housing
@@ -329,7 +329,7 @@ void MyDetectorConstruction::ConstructScintillator()
         Rotation->rotateZ(90*deg);	
    
         G4ThreeVector pad_loc = G4ThreeVector(i*xspacing-xoffset,(-fScint_x+fPad_x)/2+(fCube_x+fPad_x)*k,j*zspacing-zoffset);
-        G4VPhysicalVolume* pad = new G4PVPlacement(Rotation,pad_loc,fPad_log,
+        pad = new G4PVPlacement(Rotation,pad_loc,fPad_log,
                                 "pad_phys", logicWorld,
                                 false,k+j*(fCube_mult+1)+i*(jmax*(fCube_mult+1)),checkGeometry);
 
@@ -588,7 +588,7 @@ void MyDetectorConstruction::ConstructSDandField()
   // here we make a sensative detector and we tell the logical detector that it is this sensitive detector
   MySensitiveDetector *sensDet = new MySensitiveDetector("SensitiveDetector");
 
-  if(isCherenkov) logicDetector->SetSensitiveDetector(sensDet);
+  if(isScintillator) fScint_log->SetSensitiveDetector(sensDet);
   
 }
 

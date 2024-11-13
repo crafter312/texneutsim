@@ -28,11 +28,11 @@ void MyPrimaryGenerator::GeneratePrimaries(G4Event *anEvent)
 
   if(particle==G4Geantino::Geantino())
   {
-      G4int Z = 11;
-      G4int A = 22;
+      G4int Z = 98;
+      G4int A = 252;
 
       G4double charge = 0.*eplus; // give charge if needed
-      G4double energy = 0.*keV;
+      G4double energy = 500.*keV;
 
       G4ParticleDefinition *ion = G4IonTable::GetIonTable()->GetIon(Z,A,energy);
 

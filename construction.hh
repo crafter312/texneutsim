@@ -44,7 +44,7 @@ class MyDetectorConstruction : public G4VUserDetectorConstruction
                     *logicScintillator,*fScint_log,*fExperimentalHall_log,*fHousing_log,*fPmt_log,*fPhotocath_log,
                     *fMuShield_log,*fPad_log;
     G4VPhysicalVolume *physWorld, *physRadiator, *physDetector, 
-                      *physScintillator,*cube_phys,*fmuMetal_phys;
+                      *physScintillator,*cube_phys,*fmuMetal_phys,*pad;
     G4int nCols,nRows;
 
     G4OpticalSurface *mirrorSurface;

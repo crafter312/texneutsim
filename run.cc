@@ -14,15 +14,27 @@ MyRunAction::MyRunAction()
   man->CreateNtupleDColumn("fTime");
   man->FinishNtuple(0);
 
-  man->CreateNtuple("Hits","Hits");
+  man->CreateNtuple("PhotonHits","PhotonHits");
   man->CreateNtupleIColumn("fEvent");
   man->CreateNtupleDColumn("fX");
   man->CreateNtupleDColumn("fY");
   man->CreateNtupleDColumn("fZ");
   man->FinishNtuple(1);
 
+  
+
   man->CreateNtuple("Scoring","Scoring");
+  man->CreateNtupleIColumn("fEvent");
   man->CreateNtupleDColumn("fEdep");
+  man->CreateNtupleDColumn("fX");
+  man->CreateNtupleDColumn("fY");
+  man->CreateNtupleDColumn("fZ");
+  man->CreateNtupleDColumn("fXneutron");
+  man->CreateNtupleDColumn("fYneutron");
+  man->CreateNtupleDColumn("fZneutron");
+  man->CreateNtupleDColumn("fXgamma");
+  man->CreateNtupleDColumn("fYgamma");
+  man->CreateNtupleDColumn("fZgamma");
   man->FinishNtuple(2);
 
 }

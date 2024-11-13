@@ -16,10 +16,9 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
 
   G4LogicalVolume *fScoringVolume = detectorConstruction->GetScoringVolume();
 
-  if(volume != fScoringVolume)
-    return;
-
+  if(volume != fScoringVolume) return;
 
   G4double edep = step->GetTotalEnergyDeposit();
   fEventAction->AddEdep(edep);
+  
 }
