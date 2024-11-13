@@ -1,5 +1,6 @@
-This simulation is used to simulate the TexNeut neutron detector array with
-scintillation light. 
+This README is for the examplesim Geant4 simulation. This code is inspired by
+tutorials from the Physics Matters Youtube channel. This code follows
+the tutorial video 1-13. 
 
 To use this code, after downloading: 
 $ cd build	

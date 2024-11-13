@@ -11,6 +11,7 @@ MyRunAction::MyRunAction()
   man->CreateNtupleDColumn("fY");
   man->CreateNtupleDColumn("fZ");
   man->CreateNtupleDColumn("fWlen");
+  man->CreateNtupleDColumn("fTime");
   man->FinishNtuple(0);
 
   man->CreateNtuple("Hits","Hits");

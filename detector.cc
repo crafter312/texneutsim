@@ -34,7 +34,7 @@ G4bool MySensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhis
 { 
   G4Track *track = aStep->GetTrack(); // this allows us to track our particle in the sensitive detector
 
-  track->SetTrackStatus(fStopAndKill);
+  //track->SetTrackStatus(fStopAndKill);
 
   G4StepPoint *preStepPoint = aStep->GetPreStepPoint(); // when the photon enters the detector
   G4StepPoint *postStepPoint = aStep->GetPostStepPoint(); // when the photon leaves the detector
@@ -42,6 +42,8 @@ G4bool MySensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhis
   // get the position of the photon when it hits the detector. 
   G4ThreeVector posPhoton = preStepPoint->GetPosition();
   G4ThreeVector momPhoton = preStepPoint->GetMomentum();
+  
+  G4double time = preStepPoint->GetGlobalTime();
 
   G4double wlen = (1.239841939*eV/momPhoton.mag())*1E+03; // calculate the wavelength from the momentum
 
@@ -69,6 +71,7 @@ G4bool MySensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhis
   man->FillNtupleDColumn(0, 2, posPhoton[1]);
   man->FillNtupleDColumn(0, 3, posPhoton[2]);
   man->FillNtupleDColumn(0, 4, wlen);
+  man->FillNtupleDColumn(0, 5, time);
   man->AddNtupleRow(0);
 
   if(G4UniformRand() < quEff->Value(wlen)){

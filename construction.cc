@@ -7,8 +7,8 @@ MyDetectorConstruction::MyDetectorConstruction()
   fMessenger->DeclareProperty("nCols", nCols, "Number of columns");
   fMessenger->DeclareProperty("nRows", nRows, "Number of rows");
   fMessenger->DeclareProperty("isCherenkov", isCherenkov, "Toggle Cherenkov Detector");
-    fMessenger->DeclareProperty("isScintillator", isScintillator, "Toggle Scintillator Detector");
-
+  fMessenger->DeclareProperty("isScintillator", isScintillator, "Toggle Scintillator Detector");
+  fMessenger->DeclareProperty("isTOF", isTOF, "Toggle TOF Detector");
 
   nCols = 10;
   nRows = 10;
@@ -17,6 +17,12 @@ MyDetectorConstruction::MyDetectorConstruction()
 
   isCherenkov=false;
   isScintillator=true;
+  isTOF=false;
+
+  // size of the world volume
+  xWorld = .75*m;
+  yWorld = .75*m;
+  zWorld = .75*m;
 }
 
 MyDetectorConstruction::~MyDetectorConstruction()
@@ -54,6 +60,8 @@ void MyDetectorConstruction::DefineMaterials()
   G4double energy[2] = {1.239841939*eV/0.2, 1.239841939*eV/0.9};
   G4double rindexAerogel[2] = {1.1,1.1};
   G4double rindexWorld[2] = {1.,1.};
+  G4double rindexNaI[2] = {1.78,1.78};
+  G4double reflectivity[2] = {1.0,1.0};
 
   G4MaterialPropertiesTable *mptAerogel = new G4MaterialPropertiesTable(); // make a material property for the aerogel and add the above properties to the table
   mptAerogel->AddProperty("RINDEX",energy,rindexAerogel,2);
@@ -68,6 +76,31 @@ void MyDetectorConstruction::DefineMaterials()
   NaI = new G4Material("NaI",3.67*g/cm3,2);
   NaI->AddElement(Na,1);
   NaI->AddElement(I,1);
+
+  G4double fraction[2] = {1.0,1.0}; // fast component spectrum
+
+  // optical properties for NaI scintillator (simple)
+  G4MaterialPropertiesTable *mptNaI = new G4MaterialPropertiesTable();
+  mptNaI->AddProperty("RINDEX",energy,rindexNaI,2);
+  mptNaI->AddProperty("FASTCOMPONENT",energy,fraction,2);
+  mptNaI->AddConstProperty("SCINTILLATIONYIELD",38000./MeV);
+  mptNaI->AddConstProperty("RESOLUTIONSCALE",1.0);
+  mptNaI->AddConstProperty("FASTTIMECONSTANT",250*ns);
+  mptNaI->AddConstProperty("YIELDRATIO",1.);
+  NaI->SetMaterialPropertiesTable(mptNaI);
+
+  // optical properties for the optical coating of NaI
+  mirrorSurface = new G4OpticalSurface("mirrorSurface");
+  mirrorSurface->SetType(dielectric_metal);
+  mirrorSurface->SetFinish(ground);
+  mirrorSurface->SetModel(unified);
+  G4MaterialPropertiesTable *mptMirror = new G4MaterialPropertiesTable();
+  mptMirror->AddProperty("REFLECTIVITY",energy,reflectivity,2);
+  mirrorSurface->SetMaterialPropertiesTable(mptMirror);
+
+
+
+
 
 
   G4double a;  // atomic mass
@@ -98,32 +131,32 @@ void MyDetectorConstruction::DefineMaterials()
   Vacuum = new G4Material("Vacuum",z=1.,a=1.01*g/mole,
                           density=universe_mean_density,kStateGas,0.1*kelvin,
                           1.e-19*pascal);
+
   //Air
   Air = new G4Material("Air", density= 1.29*mg/cm3, 2);
   Air->AddElement(N, 70*perCent);
   Air->AddElement(O, 30*perCent);
+
   //Glass
   Glass = new G4Material("Glass", density=1.032*g/cm3,2);
   Glass->AddElement(C,91.533*perCent);
   Glass->AddElement(H,8.467*perCent);
  
   //***Material properties tables
-
-
-  G4double lxe_Energy[]    = { 7.0*eV , 7.07*eV, 7.14*eV };
-  G4int lxenum = sizeof(lxe_Energy)/sizeof(G4double);
-  G4double lxe_SCINT[] = { 0.1, 1.0, 0.1 };
-  assert(sizeof(lxe_SCINT) == sizeof(lxe_Energy));
-  G4double lxe_RIND[]  = { 1.65 , 1.65, 1.65 };
-  assert(sizeof(lxe_RIND) == sizeof(lxe_Energy));
-  G4double lxe_ABSL[]  = { 10.*cm, 10.*cm, 10.*cm};
-  assert(sizeof(lxe_ABSL) == sizeof(lxe_Energy));
+  G4double pterp_Energy[]    = { 7.0*eV , 7.07*eV, 7.14*eV };
+  G4int pterpnum = sizeof(pterp_Energy)/sizeof(G4double);
+  G4double pterp_SCINT[] = { 0.1, 1.0, 0.1 };
+  assert(sizeof(pterp_SCINT) == sizeof(pterp_Energy));
+  G4double pterp_RIND[]  = { 1.65 , 1.65, 1.65 };
+  assert(sizeof(pterp_RIND) == sizeof(pterp_Energy));
+  G4double pterp_ABSL[]  = { 10.*cm, 10.*cm, 10.*cm};
+  assert(sizeof(pterp_ABSL) == sizeof(pterp_Energy));
   G4MaterialPropertiesTable *pTerp_mt = new G4MaterialPropertiesTable();
-  pTerp_mt->AddProperty("FASTCOMPONENT", lxe_Energy, lxe_SCINT, lxenum);
-  pTerp_mt->AddProperty("SLOWCOMPONENT", lxe_Energy, lxe_SCINT, lxenum);
-  pTerp_mt->AddProperty("RINDEX",        lxe_Energy, lxe_RIND,  lxenum);
-  pTerp_mt->AddProperty("ABSLENGTH",     lxe_Energy, lxe_ABSL,  lxenum);
-  pTerp_mt->AddConstProperty("SCINTILLATIONYIELD",32000./MeV);
+  pTerp_mt->AddProperty("FASTCOMPONENT", pterp_Energy, pterp_SCINT, pterpnum);
+  pTerp_mt->AddProperty("SLOWCOMPONENT", pterp_Energy, pterp_SCINT, pterpnum);
+  pTerp_mt->AddProperty("RINDEX",        pterp_Energy, pterp_RIND,  pterpnum);
+  pTerp_mt->AddProperty("ABSLENGTH",     pterp_Energy, pterp_ABSL,  pterpnum);
+  pTerp_mt->AddConstProperty("SCINTILLATIONYIELD",60000./MeV);
   pTerp_mt->AddConstProperty("RESOLUTIONSCALE",1.0);
   pTerp_mt->AddConstProperty("FASTTIMECONSTANT",3.3*ns);
   pTerp_mt->AddConstProperty("SLOWTIMECONSTANT",31.*ns);
@@ -135,23 +168,28 @@ void MyDetectorConstruction::DefineMaterials()
 
 
   // glass settings
+  G4double glass_Energy[] = { 7.0*eV , 7.07*eV, 7.14*eV };
+  G4int glassnum = sizeof(glass_Energy)/sizeof(G4double);;
   G4double glass_RIND[]={1.49,1.49,1.49};
-  assert(sizeof(glass_RIND) == sizeof(lxe_Energy));
+  assert(sizeof(glass_RIND) == sizeof(glass_Energy));
   G4double glass_AbsLength[]={420.*cm,420.*cm,420.*cm};
-  assert(sizeof(glass_AbsLength) == sizeof(lxe_Energy));
+  assert(sizeof(glass_AbsLength) == sizeof(glass_Energy));
   G4MaterialPropertiesTable *glass_mt = new G4MaterialPropertiesTable();
-  glass_mt->AddProperty("ABSLENGTH",lxe_Energy,glass_AbsLength,lxenum);
-  glass_mt->AddProperty("RINDEX",lxe_Energy,glass_RIND,lxenum);
+  glass_mt->AddProperty("ABSLENGTH",glass_Energy,glass_AbsLength,glassnum);
+  glass_mt->AddProperty("RINDEX",glass_Energy,glass_RIND,glassnum);
   Glass->SetMaterialPropertiesTable(glass_mt);
 
   // silicone pad settings
+  G4double pad_Energy[] = { 7.0*eV , 7.07*eV, 7.14*eV };
+  G4int padnum = sizeof(pad_Energy)/sizeof(G4double);
+  assert(sizeof(pad_AbsLength) == sizeof(pad_Energy));
   G4double opticalpadsilicone_RIND[]={1.49,1.49,1.49};
-  assert(sizeof(opticalpadsilicone_RIND) == sizeof(lxe_Energy));
+  assert(sizeof(opticalpadsilicone_RIND) == sizeof(pad_Energy));
   G4double opticalpadsilicone_AbsLength[]={420.*cm,420.*cm,420.*cm};
-  assert(sizeof(opticalpadsilicone_AbsLength) == sizeof(lxe_Energy));
+  assert(sizeof(opticalpadsilicone_AbsLength) == sizeof(pad_Energy));
   G4MaterialPropertiesTable *opticalpadsilicone_mt = new G4MaterialPropertiesTable();
-  opticalpadsilicone_mt->AddProperty("ABSLENGTH",lxe_Energy,opticalpadsilicone_AbsLength,lxenum);
-  opticalpadsilicone_mt->AddProperty("RINDEX",lxe_Energy,opticalpadsilicone_RIND,lxenum);
+  opticalpadsilicone_mt->AddProperty("ABSLENGTH",pad_Energy,opticalpadsilicone_AbsLength,padnum);
+  opticalpadsilicone_mt->AddProperty("RINDEX",pad_Energy,opticalpadsilicone_RIND,padnum);
   OpticalPadSilicone->SetMaterialPropertiesTable(opticalpadsilicone_mt);
 
   G4double vacuum_Energy[]={2.0*eV,7.0*eV,7.14*eV};
@@ -186,20 +224,22 @@ void MyDetectorConstruction::ConstructCherenkov()
     for(G4int j=0; j<nCols; j++)
     {
       physDetector = new G4PVPlacement(0,
-                                            G4ThreeVector(-0.5*m+(i+0.5)*m/nRows,-0.5*m+(j+0.5)*m/nCols,0.49*m),
-                                            logicDetector,
-                                            "physDetector",
-                                            logicWorld,
-                                            false,
-                                            j+i*nCols, // this part gives a unique identity to each detector and is important for repeated devices
-                                            true);
+                        G4ThreeVector(-0.5*m+(i+0.5)*m/nRows,-0.5*m+(j+0.5)*m/nCols,0.49*m),
+                        logicDetector,
+                        "physDetector",
+                        logicWorld,
+                        false,
+                        j+i*nCols, // this part gives a unique identity to each detector and is important for repeated devices
+                        true);
     }
   }
 }
 
 
+
 void MyDetectorConstruction::ConstructScintillator()
 {
+
   G4int imax=16; //16 //Rows
   G4int jmax=8;//8 //Columns 
   G4double xspacing=2.86258*cm;
@@ -207,7 +247,7 @@ void MyDetectorConstruction::ConstructScintillator()
 
   G4double xoffset = (imax-1)*xspacing/2.;
   G4double yoffset = 0.;
-  G4double zoffset = jmax*zspacing/2.;
+  G4double zoffset = -0.1*m;
 
   G4double fD_mtl = 0.0635*cm;
 
@@ -229,6 +269,8 @@ void MyDetectorConstruction::ConstructScintillator()
   G4double housing_x = fScint_x-fPad_x*2;
   G4double housing_y = fScint_y+2.*fD_mtl;
   G4double housing_z = fScint_z+2.*fD_mtl;
+
+  checkGeometry = false;
  
 
   ///////////////////////////// Housing
@@ -248,7 +290,8 @@ void MyDetectorConstruction::ConstructScintillator()
     for(G4int j=0; j<jmax; j++){
       housing_loc.setX(i*xspacing-xoffset);
       housing_loc.setZ(j*zspacing-zoffset);
-      new G4PVPlacement(housing_rot,housing_loc,fHousing_log,"phys_Housing", logicWorld,false,i+j*(jmax-1),true);	
+      new G4PVPlacement(housing_rot,housing_loc,fHousing_log,"phys_Housing", logicWorld,false,i+j*(jmax-1),checkGeometry);	
+      
     }
   }
 
@@ -260,8 +303,6 @@ void MyDetectorConstruction::ConstructScintillator()
   housingSkin->SetFinish(polishedvm2000air);
   housingSkin->SetModel(glisur);
 
-
-  
   G4double pp[] = {1.0*eV, 10.*eV};
   G4int num = sizeof(pp)/sizeof(G4double);
   G4double reflectivity[] = {1., 1.};
@@ -277,8 +318,8 @@ void MyDetectorConstruction::ConstructScintillator()
  
   // create the optical pads
   fPad_box = new G4Box("pad_box",fPad_x/2,fPad_y/2,fPad_z/2);
- 
   fPad_log = new G4LogicalVolume(fPad_box,G4Material::GetMaterial("OpticalPad_Silicone"),"pad_log",0,0,0);
+
   for(G4int i=0; i<imax; i++){ 
     for(G4int j=0; j<jmax; j++){
       for(int k=0; k<fCube_mult+1; k++) {
@@ -290,7 +331,7 @@ void MyDetectorConstruction::ConstructScintillator()
         G4ThreeVector pad_loc = G4ThreeVector(i*xspacing-xoffset,(-fScint_x+fPad_x)/2+(fCube_x+fPad_x)*k,j*zspacing-zoffset);
         G4VPhysicalVolume* pad = new G4PVPlacement(Rotation,pad_loc,fPad_log,
                                 "pad_phys", logicWorld,
-                                false,k+j*(fCube_mult+1)+i*(jmax*(fCube_mult+1)),true);
+                                false,k+j*(fCube_mult+1)+i*(jmax*(fCube_mult+1)),checkGeometry);
 
         //Surface properties for the optical pad
         G4OpticalSurface* padSkin = new G4OpticalSurface("PadSkin");
@@ -333,7 +374,8 @@ void MyDetectorConstruction::ConstructScintillator()
         Rotation->rotateZ(0*deg);	
       
         G4ThreeVector cube_loc = G4ThreeVector(i*xspacing-xoffset,-fScint_x/2+fCube_x/2+fPad_x+(fCube_x+fPad_x)*k,j*zspacing-zoffset);
-        G4VPhysicalVolume* cube_phys = new G4PVPlacement(0,cube_loc,fScint_log,"scintillator",logicWorld,false,k+j*(fCube_mult+1)+i*(jmax*(fCube_mult+1)),true);
+        cube_phys = new G4PVPlacement(0,cube_loc,fScint_log,"scintillator",logicWorld,false,k+j*(fCube_mult+1)+i*(jmax*(fCube_mult+1)),checkGeometry);
+        //G4cout << k+j*(fCube_mult+1)+i*(jmax*(fCube_mult+1)) << G4endl;
 
         //Surface properties for the scintillator cubes
         G4OpticalSurface* cubeSkin = new G4OpticalSurface("cubeSkin");
@@ -392,7 +434,7 @@ void MyDetectorConstruction::ConstructScintillator()
   
   G4ThreeVector photocath_loc = G4ThreeVector(0.,0.,height_pmt-cathode_depth);
   
-  new G4PVPlacement(0,photocath_loc,fPhotocath_log,"photocath",fPmt_log,false,0,true);	
+  new G4PVPlacement(0,photocath_loc,fPhotocath_log,"photocath",fPmt_log,false,0,checkGeometry);	
   
   // define the photocathode skin
   G4double ephoton[] = {7.0*eV, 7.14*eV};
@@ -436,8 +478,8 @@ void MyDetectorConstruction::ConstructScintillator()
         mu_rotation->rotateZ(0*deg);
         fMuShield_log = new G4LogicalVolume(fMuShield_tub,G4Material::GetMaterial("Al"),"fMuShield_log",0,0,0);
 
-        G4VPhysicalVolume* fmuMetal_phys = new G4PVPlacement(mu_rotation,fMuMetal_loc,fMuShield_log,"MuShield",
-                                logicWorld,false,k+j*(fCube_mult+1)+i*(jmax*(fCube_mult+1)),true);
+        fmuMetal_phys = new G4PVPlacement(mu_rotation,fMuMetal_loc,fMuShield_log,"MuShield",
+                                logicWorld,false,k+j*(fCube_mult+1)+i*(jmax*(fCube_mult+1)),checkGeometry);
 
 
         // define the mumetal skin
@@ -486,10 +528,10 @@ void MyDetectorConstruction::ConstructScintillator()
       fPmt_loc2 = G4ThreeVector(i*xspacing-xoffset, fScint_x/2.+height_pmt,j*zspacing-zoffset); 
       
       new G4PVPlacement(pmt_rm1,fPmt_loc1,fPmt_log,"pmt",logicWorld,
-                            false,0+j*(fCube_mult+1)+i*(jmax*(fCube_mult+1)),true);
+                            false,0+j*(fCube_mult+1)+i*(jmax*(fCube_mult+1)),checkGeometry);
 
       new G4PVPlacement(pmt_rm2,fPmt_loc2,fPmt_log,"pmt",logicWorld,
-                            false,1+j*(fCube_mult+1)+i*(jmax*(fCube_mult+1)),true);
+                            false,1+j*(fCube_mult+1)+i*(jmax*(fCube_mult+1)),checkGeometry);
               
         //fPmtPositions.push_back(fPmt_loc);	
       
@@ -500,19 +542,26 @@ void MyDetectorConstruction::ConstructScintillator()
   //logicScintillator = new G4LogicalVolume(solidScintillator, NaI, "logicalScintillator");
   //physScintillator = new G4PVPlacement(0,G4ThreeVector(0.,0.,0.),logicScintillator,"physScintillator",logicWorld, false, 0, true);
   //fScoringVolume = logicScintillator;
+  fScoringVolume = fScint_log; 
   
   VisAttributes();
-  
+
+
+
+}
+
+
+void MyDetectorConstruction::ConstructTOF()
+{
+  solidDetector = new G4Box("solidDetector",1.*m,1.*m,0.1*m);
+  logicDetector = new G4LogicalVolume(solidDetector, worldMat,"logicDetector");
+  physDetector = new G4PVPlacement(0,G4ThreeVector(0.*m,0.*m,-4.*m),logicDetector,"physDetector",logicWorld,false,0,true);
+  physDetector = new G4PVPlacement(0,G4ThreeVector(0.*m,0.*m, 3.*m),logicDetector,"physDetector",logicWorld,false,1,true);
 }
 
 
 G4VPhysicalVolume *MyDetectorConstruction::Construct()
 {
-
-  // size of the world volume
-  xWorld = 0.5*m;
-  yWorld = 0.5*m;
-  zWorld = 0.5*m;
 
 
   // Every material in geant4 has 3 parts
@@ -526,6 +575,7 @@ G4VPhysicalVolume *MyDetectorConstruction::Construct()
 
   if(isCherenkov) ConstructCherenkov();
   if(isScintillator) ConstructScintillator();
+  if(isTOF) ConstructTOF();
 
 
   return physWorld;
@@ -569,3 +619,4 @@ void MyDetectorConstruction::VisAttributes()
   pad_va->SetForceSolid(true);
   fPad_log->SetVisAttributes(pad_va);
 }
+

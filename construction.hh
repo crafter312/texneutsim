@@ -23,6 +23,7 @@
 #include "detector.hh"
 
 
+
 // Here we define a new detector construction which is inherited from the
 // G4UserDetectorConstruction class supplied by Geant4.
 class MyDetectorConstruction : public G4VUserDetectorConstruction
@@ -43,11 +44,14 @@ class MyDetectorConstruction : public G4VUserDetectorConstruction
                     *logicScintillator,*fScint_log,*fExperimentalHall_log,*fHousing_log,*fPmt_log,*fPhotocath_log,
                     *fMuShield_log,*fPad_log;
     G4VPhysicalVolume *physWorld, *physRadiator, *physDetector, 
-                      *physScintillator;
+                      *physScintillator,*cube_phys,*fmuMetal_phys;
     G4int nCols,nRows;
+
+    G4OpticalSurface *mirrorSurface;
 
     G4Material *SiO2, *H2O, *Aerogel, *worldMat, *NaI,*Air,*Al,*Vacuum,*OpticalPadSilicone,*pTerp,*Glass;
     G4Element *C, *Na,*I,*H,*O,*N;
+
 
     G4GenericMessenger *fMessenger;
 
@@ -57,10 +61,14 @@ class MyDetectorConstruction : public G4VUserDetectorConstruction
 
     bool isCherenkov;
     bool isScintillator;
+    bool isTOF;
+
+    bool checkGeometry;
         
     void DefineMaterials();
     void ConstructCherenkov();
     void ConstructScintillator();
+    void ConstructTOF();
     virtual void ConstructSDandField();
     void VisAttributes();
 };
