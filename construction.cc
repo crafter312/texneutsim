@@ -6,18 +6,14 @@ MyDetectorConstruction::MyDetectorConstruction()
 
   fMessenger->DeclareProperty("nCols", nCols, "Number of columns");
   fMessenger->DeclareProperty("nRows", nRows, "Number of rows");
-  fMessenger->DeclareProperty("isCherenkov", isCherenkov, "Toggle Cherenkov Detector");
-  fMessenger->DeclareProperty("isScintillator", isScintillator, "Toggle Scintillator Detector");
-  fMessenger->DeclareProperty("isTOF", isTOF, "Toggle TOF Detector");
+  //fMessenger->DeclareProperty("isCherenkov", isCherenkov, "Toggle Cherenkov Detector");
+  //fMessenger->DeclareProperty("isScintillator", isScintillator, "Toggle Scintillator Detector");
+  //fMessenger->DeclareProperty("isTOF", isTOF, "Toggle TOF Detector");
 
   nCols = 10;
   nRows = 10;
 
   DefineMaterials();
-
-  isCherenkov=false;
-  isScintillator=true;
-  isTOF=false;
 
   // size of the world volume
   xWorld = .75*m;
@@ -367,11 +363,6 @@ void MyDetectorConstruction::ConstructScintillator()
   for(G4int i=0; i<imax; i++){ 
     for(G4int j=0; j<jmax; j++){
       for(int k=0; k<fCube_mult; k++){
-        //Create a Rotation Matrix
-        G4RotationMatrix* Rotation = new G4RotationMatrix();
-        Rotation->rotateX(90*deg);
-        Rotation->rotateY(0*deg);
-        Rotation->rotateZ(0*deg);	
       
         G4ThreeVector cube_loc = G4ThreeVector(i*xspacing-xoffset,-fScint_x/2+fCube_x/2+fPad_x+(fCube_x+fPad_x)*k,j*zspacing-zoffset);
         cube_phys = new G4PVPlacement(0,cube_loc,fScint_log,"scintillator",logicWorld,false,k+j*(fCube_mult+1)+i*(jmax*(fCube_mult+1)),checkGeometry);
@@ -573,9 +564,9 @@ G4VPhysicalVolume *MyDetectorConstruction::Construct()
   logicWorld = new G4LogicalVolume(solidWorld,worldMat,"locigWorld");
   physWorld = new G4PVPlacement(0,G4ThreeVector(0.,0.,0.),logicWorld,"physWorld",0,false,0,true);
 
-  if(isCherenkov) ConstructCherenkov();
-  if(isScintillator) ConstructScintillator();
-  if(isTOF) ConstructTOF();
+  //if(isCherenkov) ConstructCherenkov();
+  ConstructScintillator();
+  //if(isTOF) ConstructTOF();
 
 
   return physWorld;
@@ -586,9 +577,12 @@ void MyDetectorConstruction::ConstructSDandField()
 
 
   // here we make a sensative detector and we tell the logical detector that it is this sensitive detector
-  MySensitiveDetector *sensDet = new MySensitiveDetector("SensitiveDetector");
+  ScintillatorSD *sensDet = new ScintillatorSD("SensitiveScintillator");
 
   if(isScintillator) fScint_log->SetSensitiveDetector(sensDet);
+
+
+
   
 }
 

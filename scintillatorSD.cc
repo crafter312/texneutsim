@@ -1,6 +1,6 @@
-#include "detector.hh"
+#include "scintillatorSD.hh"
 
-MySensitiveDetector::MySensitiveDetector(G4String name) : G4VSensitiveDetector(name)
+ScintillatorSD::ScintillatorSD(G4String name) : G4VSensitiveDetector(name)
 {
   quEff = new G4PhysicsOrderedFreeVector();
 
@@ -27,10 +27,10 @@ MySensitiveDetector::MySensitiveDetector(G4String name) : G4VSensitiveDetector(n
 
 }
 
-MySensitiveDetector::~MySensitiveDetector()
+ScintillatorSD::~ScintillatorSD()
 {}
 
-G4bool MySensitiveDetector::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
+G4bool ScintillatorSD::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
 { 
   G4Track *track = aStep->GetTrack(); // this allows us to track our particle in the sensitive detector
 

@@ -8,11 +8,11 @@
 #include "g4root.hh"
 #include "run.hh"
 
-class MySensitiveDetector : public G4VSensitiveDetector
+class ScintillatorSD : public G4VSensitiveDetector
 {
   public:
-    MySensitiveDetector(G4String);
-    ~MySensitiveDetector();
+    ScintillatorSD(G4String);
+    ~ScintillatorSD();
 
   private:
     virtual G4bool ProcessHits(G4Step *, G4TouchableHistory *);
