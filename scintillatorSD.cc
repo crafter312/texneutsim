@@ -27,8 +27,10 @@ ScintillatorSD::ScintillatorSD(G4String name) : G4VSensitiveDetector(name)
 
 }
 
+
 ScintillatorSD::~ScintillatorSD()
 {}
+
 
 G4bool ScintillatorSD::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
 { 
@@ -64,6 +66,7 @@ G4bool ScintillatorSD::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
   
 
   // handle optical photons
+  /*
   if(track->GetParticleDefinition()->GetParticleName() == "opticalphoton"){
     // get the position of the photon when it hits the detector. 
     G4ThreeVector posPhoton = preStepPoint->GetPosition();
@@ -92,7 +95,7 @@ G4bool ScintillatorSD::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
     }
 
   }
-
+  */
 
 
 
