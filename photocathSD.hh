@@ -1,5 +1,5 @@
-#ifndef DETECTOR_HH
-#define DETECTOR_HH
+#ifndef PHOTOCATHSD_HH
+#define PHOTOCATHSD_HH
 
 #include "G4VSensitiveDetector.hh"
 #include "G4RunManager.hh"

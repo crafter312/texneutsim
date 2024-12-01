@@ -1,6 +1,7 @@
 #ifndef CONSTRUCTION_HH
 #define CONSTRUCTION_HH
 
+#include <map>
 
 #include "G4VUserDetectorConstruction.hh"
 #include "G4VPhysicalVolume.hh"
@@ -15,6 +16,9 @@
 #include "G4VisAttributes.hh"
 #include "G4PhysicalConstants.hh"
 #include "G4Material.hh"
+#include "G4SDManager.hh"
+#include "G4ProductionCutsTable.hh"
+#include "G4UserLimits.hh"
 
 #include "G4OpticalSurface.hh"
 #include "G4LogicalBorderSurface.hh"
@@ -37,6 +41,8 @@ class MyDetectorConstruction : public G4VUserDetectorConstruction
 
     virtual G4VPhysicalVolume *Construct(); // this is the main function that constructs the detector geometry
 
+    
+    
   private:
     G4Box *solidWorld, *solidRadiator, *solidDetector,*fScint_box,*fPad_box;
     G4SubtractionSolid *fHousing_box;
@@ -46,7 +52,6 @@ class MyDetectorConstruction : public G4VUserDetectorConstruction
                     *fMuShield_log,*fPad_log;
     G4VPhysicalVolume *physWorld, *physRadiator, *physDetector, 
                       *cube_phys,*fmuMetal_phys,*pad;
-    G4int nCols,nRows;
 
     G4OpticalSurface *mirrorSurface;
 
@@ -59,14 +64,15 @@ class MyDetectorConstruction : public G4VUserDetectorConstruction
 
     G4double xWorld,yWorld,zWorld;
 
-    bool isCherenkov;
-    bool isScintillator;
-    bool isTOF;
+    G4double fCube_mult;
+    G4int imax;
+    G4int jmax;
+
+    std::map<G4int, G4ThreeVector> copyPositions;
 
     bool checkGeometry;
         
     void DefineMaterials();
-    void ConstructCherenkov();
     void ConstructScintillator();
     void ConstructTOF();
     virtual void ConstructSDandField();

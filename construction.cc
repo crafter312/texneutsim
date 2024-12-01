@@ -4,14 +4,11 @@ MyDetectorConstruction::MyDetectorConstruction()
 {
   fMessenger = new G4GenericMessenger(this, "/detector/", "Detector Construction");
 
-  fMessenger->DeclareProperty("nCols", nCols, "Number of columns");
-  fMessenger->DeclareProperty("nRows", nRows, "Number of rows");
-  //fMessenger->DeclareProperty("isCherenkov", isCherenkov, "Toggle Cherenkov Detector");
-  //fMessenger->DeclareProperty("isScintillator", isScintillator, "Toggle Scintillator Detector");
-  //fMessenger->DeclareProperty("isTOF", isTOF, "Toggle TOF Detector");
+  //fMessenger->DeclareProperty("nCols", nCols, "Number of columns");
+  //fMessenger->DeclareProperty("nRows", nRows, "Number of rows");
 
-  nCols = 10;
-  nRows = 10;
+  // set the low and high limits for secondary particle creation
+  G4ProductionCutsTable::GetProductionCutsTable()->SetEnergyRange(0.1 * eV, 100 * GeV);
 
   DefineMaterials();
 
@@ -95,35 +92,33 @@ void MyDetectorConstruction::DefineMaterials()
   mirrorSurface->SetMaterialPropertiesTable(mptMirror);
 
 
-
-
-
-
   G4double a;  // atomic mass
   G4double z;  // atomic number
   G4double density;
 
-
   //***Elements
-  H = new G4Element("H", "H", z=1., a=1.01*g/mole);
-  C = new G4Element("C", "C", z=6., a=12.01*g/mole);
-  N = new G4Element("N", "N", z=7., a= 14.01*g/mole);
-  O = new G4Element("O", "O", z=8., a= 16.00*g/mole);
+  H = nist->FindOrBuildElement("H");
+  C = nist->FindOrBuildElement("C");
+  N = nist->FindOrBuildElement("N");
+  O = nist->FindOrBuildElement("O");
 
   //***Materials
   //p-Terphenyl
-  pTerp = new G4Material("pTerp",density=1.23*g/cm3,2);// this is really pterphenyl, not LXe
+  pTerp = new G4Material("pTerp",1.23*g/cm3,2);
   pTerp->AddElement(H,14);
   pTerp->AddElement(C,18);
+
   //EJ-560 Silicone Optical Pad
   OpticalPadSilicone = new G4Material("OpticalPad_Silicone",density=1.03*g/cm3,2);
   OpticalPadSilicone->AddElement(H,6);
   OpticalPadSilicone->AddElement(C,2);
-  //Liquid Xenon
-  //fLXe = new G4Material("LXe",z=54.,a=131.29*g/mole,density=3.020*g/cm3);
+
+
+
   //Aluminum
   Al = new G4Material("Al",z=13.,a=26.98*g/mole,density=2.7*g/cm3);
   //Vacuum
+
   Vacuum = new G4Material("Vacuum",z=1.,a=1.01*g/mole,
                           density=universe_mean_density,kStateGas,0.1*kelvin,
                           1.e-19*pascal);
@@ -159,7 +154,7 @@ void MyDetectorConstruction::DefineMaterials()
   pTerp_mt->AddConstProperty("YIELDRATIO",1.0);
   pTerp->SetMaterialPropertiesTable(pTerp_mt);
   // Set the Birks Constant for the LXe scintillator
-  pTerp->GetIonisation()->SetBirksConstant(0.126*mm/MeV);
+  //pTerp->GetIonisation()->SetBirksConstant(0.126*mm/MeV);
  
 
 
@@ -200,50 +195,22 @@ void MyDetectorConstruction::DefineMaterials()
 }
 
 
-void MyDetectorConstruction::ConstructCherenkov()
-{
-  // here we can construction our aerogel
-  solidRadiator = new G4Box("solidRadiator",0.4*m, 0.4*m, 0.01*m);
-  logicRadiator = new G4LogicalVolume(solidRadiator,Aerogel,"logicRadiator");
-  physRadiator = new G4PVPlacement(0, G4ThreeVector(0.,0.,0.25*m),logicRadiator,"physRadiator", logicWorld, false, 0, true);
-  fScoringVolume = logicRadiator;
-
-  // now we will make a sensitive detector
-  solidDetector = new G4Box("solidDetector",xWorld/nRows,yWorld/nCols,0.01*m);
-  logicDetector = new G4LogicalVolume(solidDetector,worldMat,"logicDetector"); // we make it from air but it can still detect photons
-
-  // here we generate many detectors at the same time. The value of rows and
-  // columns is initialized in the header file but can be changed at runtime
-  // by using the commands of the detector class
-  for(G4int i=0; i<nRows; i++)// for loop to produce many detectors
-  {
-    for(G4int j=0; j<nCols; j++)
-    {
-      physDetector = new G4PVPlacement(0,
-                        G4ThreeVector(-0.5*m+(i+0.5)*m/nRows,-0.5*m+(j+0.5)*m/nCols,0.49*m),
-                        logicDetector,
-                        "physDetector",
-                        logicWorld,
-                        false,
-                        j+i*nCols, // this part gives a unique identity to each detector and is important for repeated devices
-                        true);
-    }
-  }
-}
 
 
 
 void MyDetectorConstruction::ConstructScintillator()
 {
+  fCube_mult = 6; // number of crystals per bar
 
-  G4int imax=16; //16 //Rows
-  G4int jmax=8;//8 //Columns 
+  imax = 16; // 16 Rows
+  jmax = 8;  //  8 Columns 
+
   G4double xspacing=2.86258*cm;
   G4double zspacing=4.13766*cm;
 
   G4double xoffset = (imax-1)*xspacing/2.;
   G4double yoffset = 0.;
-  G4double zoffset = -0.1*m;
+  G4double zoffset = -0.025*m;
 
   G4double fD_mtl = 0.0635*cm;
 
@@ -267,7 +234,6 @@ void MyDetectorConstruction::ConstructScintillator()
   G4double housing_z = fScint_z+2.*fD_mtl;
 
   checkGeometry = true;
- 
 
   ///////////////////////////// Housing
   G4Box* outerBox = new G4Box("Outer Box",housing_x/2.,housing_y/2.,housing_z/2.);
@@ -357,15 +323,25 @@ void MyDetectorConstruction::ConstructScintillator()
 
   // Create the discrete scintillator cubes
   fScint_box = new G4Box("scint_box",fCube_x/2.,fScint_y/2.,fScint_z/2.); 
-  fScint_log = new G4LogicalVolume(fScint_box,G4Material::GetMaterial("pTerp"),"scint_log",0,0,0);
-  
+  fScint_log = new G4LogicalVolume(fScint_box,pTerp,"scint_log",0,0,0);
+
+  // Set user limits for the detector
+  G4UserLimits* userLimits = new G4UserLimits(DBL_MAX, DBL_MAX, DBL_MAX, 0.01 * mm);
+  fScint_log->SetUserLimits(userLimits);
+
+  G4int scintCopyNo = 0;
 
   for(G4int i=0; i<imax; i++){ 
     for(G4int j=0; j<jmax; j++){
       for(int k=0; k<fCube_mult; k++){
       
+        scintCopyNo = k+j*(fCube_mult+1)+i*(jmax*(fCube_mult+1));
+
         G4ThreeVector cube_loc = G4ThreeVector(i*xspacing-xoffset,-fScint_x/2+fCube_x/2+fPad_x+(fCube_x+fPad_x)*k,j*zspacing-zoffset);
-        cube_phys = new G4PVPlacement(0,cube_loc,fScint_log,"scintillator",logicWorld,false,k+j*(fCube_mult+1)+i*(jmax*(fCube_mult+1)),checkGeometry);
+        cube_phys = new G4PVPlacement(0,cube_loc,fScint_log,"scintillator",logicWorld,false,scintCopyNo,checkGeometry);
+        
+        copyPositions[scintCopyNo] = cube_loc;
+        
         //G4cout << k+j*(fCube_mult+1)+i*(jmax*(fCube_mult+1)) << G4endl;
 
         //Surface properties for the scintillator cubes
@@ -533,7 +509,7 @@ void MyDetectorConstruction::ConstructScintillator()
   //logicScintillator = new G4LogicalVolume(solidScintillator, NaI, "logicalScintillator");
   //physScintillator = new G4PVPlacement(0,G4ThreeVector(0.,0.,0.),logicScintillator,"physScintillator",logicWorld, false, 0, true);
   //fScoringVolume = logicScintillator;
-  fScoringVolume = fScint_log; 
+  fScoringVolume = fScint_log;
   
   VisAttributes();
 
@@ -564,9 +540,7 @@ G4VPhysicalVolume *MyDetectorConstruction::Construct()
   logicWorld = new G4LogicalVolume(solidWorld,worldMat,"locigWorld");
   physWorld = new G4PVPlacement(0,G4ThreeVector(0.,0.,0.),logicWorld,"physWorld",0,false,0,true);
 
-  //if(isCherenkov) ConstructCherenkov();
   ConstructScintillator();
-  //if(isTOF) ConstructTOF();
 
 
   return physWorld;
@@ -575,14 +549,12 @@ G4VPhysicalVolume *MyDetectorConstruction::Construct()
 void MyDetectorConstruction::ConstructSDandField()
 {
 
-
+  auto sdManager = G4SDManager::GetSDMpointer();
   // here we make a sensative detector and we tell the logical detector that it is this sensitive detector
-  ScintillatorSD *sensDet = new ScintillatorSD("SensitiveScintillator");
-
-  if(isScintillator) fScint_log->SetSensitiveDetector(sensDet);
-
-
-
+  ScintillatorSD *scintDet = new ScintillatorSD("SensitiveScintillator");
+  sdManager->AddNewDetector(scintDet);
+  fScint_log->SetSensitiveDetector(scintDet);
+  scintDet->SetCopyPositions(copyPositions);
   
 }
 
@@ -598,11 +570,11 @@ void MyDetectorConstruction::VisAttributes()
   fScint_log->SetVisAttributes(scint_va);
 
   G4VisAttributes* cathode_va = new G4VisAttributes(G4Colour(0.8,0.4,0.4));
-  cathode_va->SetForceSolid(true);
+  cathode_va->SetForceSolid(false);
   fPhotocath_log->SetVisAttributes(cathode_va);
 
   G4VisAttributes* pmt_va = new G4VisAttributes(G4Colour(0.6,1.0,0.6,0.3));
-  pmt_va->SetForceSolid(true);
+  pmt_va->SetForceSolid(false);
   fPmt_log->SetVisAttributes(pmt_va);
 
   //G4VisAttributes* mushield_va = new G4VisAttributes(G4Colour(0.6,0.6,.6,0.3));
@@ -610,7 +582,7 @@ void MyDetectorConstruction::VisAttributes()
   //fMuShield_log->SetVisAttributes(mushield_va);
 
   G4VisAttributes* pad_va = new G4VisAttributes(G4Colour(0.4,1.,0.4,0.4));
-  pad_va->SetForceSolid(true);
+  pad_va->SetForceSolid(false);
   fPad_log->SetVisAttributes(pad_va);
 }
 

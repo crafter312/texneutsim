@@ -1,30 +1,8 @@
 #include "scintillatorSD.hh"
 
-ScintillatorSD::ScintillatorSD(G4String name) : G4VSensitiveDetector(name)
+ScintillatorSD::ScintillatorSD(const G4String name) : G4VSensitiveDetector(name), fHitsCollection(nullptr)
 {
-  quEff = new G4PhysicsOrderedFreeVector();
-
-  std::ifstream datafile;
-  datafile.open("efficiency.dat");
-
-  while(1)
-  {
-    G4double wlen, queff;
-
-    datafile>>wlen>>queff;
-
-    if(datafile.eof())
-      break;
-
-    //G4cout <<wlen << " " << queff << G4endl;
-
-    quEff->InsertValues(wlen,queff);
-  }
-
-  datafile.close();
-
-  quEff->SetSpline(false);
-
+  collectionName.insert("ScintillatorHitsCollection");
 }
 
 
@@ -32,18 +10,128 @@ ScintillatorSD::~ScintillatorSD()
 {}
 
 
-G4bool ScintillatorSD::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
+void ScintillatorSD::Initialize(G4HCofThisEvent *hce)
+{
+  fHitsCollection = new G4THitsCollection<ScintillatorHit>(SensitiveDetectorName, collectionName[0]);
+  G4int hcID = G4SDManager::GetSDMpointer()->GetCollectionID(collectionName[0]);
+  hce->AddHitsCollection(hcID, fHitsCollection);
+}
+
+
+G4bool ScintillatorSD::ProcessHits(G4Step *step, G4TouchableHistory *ROhist)
 { 
-  G4Track *track = aStep->GetTrack(); // this allows us to track our particle in the sensitive detector
+
+  // Get the current track
+  G4Track* track = step->GetTrack();
+
+  // get the particle name and print information about the interaction
+  auto particleName = track->GetDefinition()->GetParticleName();
+  if (particleName == "neutron") {
+    std::cout << "Neutron interaction detected!" << std::endl;
+    const G4VProcess* process = step->GetPostStepPoint()->GetProcessDefinedStep();
+    if (process) {
+      G4String processName = process->GetProcessName();
+      std::cout << "Process: " << processName << std::endl;
+
+      if (processName == "neutronInelastic" || processName == "nCapture" || processName == "hadElastic") {
+        std::cout << "Neutron interacted via: " << processName << std::endl;
+      }
+    }
+
+    // Check if any secondaries are produced in this step
+    const std::vector<const G4Track*>* secondaries = step->GetSecondaryInCurrentStep();
+    if (secondaries->size() > 0) {
+      
+      std::cout << "Number of secondaries: " << secondaries->size() << std::endl;
+
+      for (const auto& secondary : *secondaries) {
+        // Get secondary particle information
+        auto secondaryName = secondary->GetDefinition()->GetParticleName();
+        auto secondaryEnergy = secondary->GetKineticEnergy();
+        std::cout << "Secondary: " << secondaryName 
+                  << ", Energy: " << secondaryEnergy / MeV << " MeV" << std::endl;
+
+        // Optionally, calculate energy deposition from secondaries
+      }
+    }
+  }
+
+
+  G4double energyDeposit = step->GetTotalEnergyDeposit();
+  if (energyDeposit == 0) return false;
+
+  
+  // Get particle and parent information
+  G4int trackID = track->GetTrackID();   // ID of this particle
+  G4int parentID = track->GetParentID(); // Parent ID
+  // particleName = track->GetDefinition()->GetParticleName();
+
+  /*G4cout << "trackID " << trackID
+         << ", parentID " << parentID 
+         << ", particleName " << particleName
+         << G4endl;*/
+
+  /*// Check if this is a secondary or primary
+  G4String primaryParticle = "Unknown";
+  if (parentID == 0) {
+    primaryParticle = particleName; // This is the primary particle
+  } else {
+    // Get the primary particle type from the parent history
+    const G4Track* primaryTrack = track;
+    //for(int i=0; i<50; i++){
+    while (primaryTrack->GetParentID() != parentID) {
+      primaryTrack = primaryTrack->GetStep()->GetTrack();
+      //G4cout<< primaryTrack->GetParentID() << G4endl;
+    }
+    primaryParticle = primaryTrack->GetDefinition()->GetParticleName();
+  }*/
+
+  //G4cout << "primaryParticle " << primaryParticle << G4endl;
+
+  // Get the particle type
+  //G4String particleName = step->GetTrack()->GetDefinition()->GetParticleName();
+
+  
+  // define a new hit in the scintillator
+  ScintillatorHit* newHit = new ScintillatorHit();
+
+  // Get the copy number of the volume
+  G4int copyNumber = step->GetPreStepPoint()->GetTouchable()->GetCopyNumber(); // Copy number of this volume
+
+  // Get the position of the current volume
+  G4ThreeVector HitPosition = step->GetPreStepPoint()->GetPosition();
+  G4ThreeVector DetPosition = fCopyPositions[copyNumber]; /*step->GetPreStepPoint()
+                                      ->GetTouchable()
+                                      ->GetHistory()
+                                      ->GetTopTransform()
+                                      .TransformPoint(HitPosition);*/
+
+
+  newHit->SetTime(step->GetPreStepPoint()->GetGlobalTime());
+  newHit->SetEnergy(energyDeposit);
+  newHit->SetParticleName(particleName);
+  newHit->SetCopyNumber(copyNumber);
+  newHit->SetHitPosition(HitPosition);
+  newHit->SetDetectorPosition(DetPosition);
+
+
+
+  fHitsCollection->insert(newHit);
+  return true;
+
+  /////////////////////////////////////*
+
+  /*
+  G4Track *track = Step->GetTrack(); // this allows us to track our particle in the sensitive detector
 
   //track->SetTrackStatus(fStopAndKill);
 
-  G4StepPoint *preStepPoint = aStep->GetPreStepPoint(); // when the photon enters the detector
-  G4StepPoint *postStepPoint = aStep->GetPostStepPoint(); // when the photon leaves the detector
+  G4StepPoint *preStepPoint = Step->GetPreStepPoint(); // when the photon enters the detector
+  G4StepPoint *postStepPoint = Step->GetPostStepPoint(); // when the photon leaves the detector
 
   G4double time = preStepPoint->GetGlobalTime();
 
-  const G4VTouchable *touchable = aStep->GetPreStepPoint()->GetTouchable();
+  const G4VTouchable *touchable = Step->GetPreStepPoint()->GetTouchable();
 
   // get the detector ID for the detector that was hit
   G4int copyNo = touchable->GetCopyNumber();
@@ -62,7 +150,7 @@ G4bool ScintillatorSD::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
   G4AnalysisManager *man = G4AnalysisManager::Instance();
 
   
-  
+  */
   
 
   // handle optical photons
@@ -99,7 +187,7 @@ G4bool ScintillatorSD::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
 
 
 
-
+/*
   // handle neutrons
   if(track->GetParticleDefinition()->GetParticleName() == "neutron"){
     // get the position of the neutron when it hits the detector. 
@@ -153,19 +241,8 @@ G4bool ScintillatorSD::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
 
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
   
 
   return true;
+  */
 }

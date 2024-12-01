@@ -9,6 +9,11 @@
 #include "G4Geantino.hh"
 #include "G4IonTable.hh"
 
+#include "Randomize.hh"
+
+#include <cmath>
+
+
 class MyPrimaryGenerator : public G4VUserPrimaryGeneratorAction
 {
   public:
@@ -19,6 +24,9 @@ class MyPrimaryGenerator : public G4VUserPrimaryGeneratorAction
 
   private:
     G4ParticleGun *fParticleGun;
+    G4ThreeVector fConeAxis;
+    G4double fConeAngle;
+    G4double fConeApexRadius;
 };
 
 #endif
