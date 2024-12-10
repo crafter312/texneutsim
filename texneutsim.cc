@@ -17,11 +17,14 @@ int main(int argc, char** argv)
 
   G4UIExecutive *ui = 0;
 
+
+  
+
   // this allows for multi or single thread depending on the build
   //#ifdef G4MULTITHREADED
   //  G4MTRunManager *runManager = new G4MTRunManager();
   //#else
-    G4RunManager *runManager = new G4RunManager();
+    G4RunManager *runManager = new G4RunManager(); // comment all lines in this block EXCEPT this one for single core use
   //#endif
 
   

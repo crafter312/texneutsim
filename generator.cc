@@ -5,48 +5,61 @@ MyPrimaryGenerator::MyPrimaryGenerator()
   fParticleGun = new G4ParticleGun(1);// define the number of primary particles created per event
 
   G4ParticleTable *particleTable = G4ParticleTable::GetParticleTable();
-  G4String particleName = "proton";
-  G4ParticleDefinition *particle = particleTable->FindParticle("neutron");
-  //G4ParticleDefinition *particle = particleTable->FindParticle("geantino");
+
+
+  fParticleName = "neutron"; // neutron cone
+  //fParticleName = "geantino"; // decays
+
+  G4ParticleDefinition *particle = particleTable->FindParticle(fParticleName);
   
   fParticleGun->SetParticleDefinition(particle);
 
 }
+
 
 MyPrimaryGenerator::~MyPrimaryGenerator()
 {
   delete fParticleGun;
 }
 
+
 void MyPrimaryGenerator::GeneratePrimaries(G4Event *anEvent)
 {
+
   G4ParticleDefinition *particle = fParticleGun->GetParticleDefinition();
 
-  if(particle==G4Geantino::Geantino())
+  if(fParticleName == "geantino")
   {
+    // Cf-252
     G4int Z = 98;
     G4int A = 252;
+
+    // Na-22
+    //G4int Z = 11;
+    //G4int A = 22;
+
 
     G4double charge = 0.*eplus; // give charge if needed
     G4double energy = 0.*keV;
 
     G4ParticleDefinition *ion = G4IonTable::GetIonTable()->GetIon(Z,A,energy);
     
-    G4ThreeVector pos(0.,0.,0.); // the position of the particle gun
-    G4ThreeVector mom(0.,0.,1.); // the particle momentum
+    G4ThreeVector sourcePosition(0.,0.,0.); // the position of the particle gun
+    G4ThreeVector sourceMomentumDir(0.,0.,1.); // the particle momentum
 
     // set particle gun parameters
-    fParticleGun->SetParticlePosition(pos);
-    fParticleGun->SetParticleMomentumDirection(mom);
-    fParticleGun->SetParticleMomentum(0.*GeV);
-    fParticleGun->SetParticleDefinition(particle);
+    fParticleGun->SetParticlePosition(sourcePosition);
+    fParticleGun->SetParticleMomentumDirection(sourceMomentumDir);
+    fParticleGun->SetParticleEnergy(0.*MeV);
+    //fParticleGun->SetParticleDefinition(particle);
 
-
-    fParticleGun->SetParticleDefinition(ion);
     fParticleGun->SetParticleCharge(charge);
+    fParticleGun->SetParticleDefinition(ion);
   }
 
-  if(particle!=G4Geantino::Geantino())
+
+
+  if(fParticleName == "neutron")
   {
     fConeAxis = G4ThreeVector(0., 0., 1.);
     fConeAngle = 30.*deg;
@@ -76,11 +89,10 @@ void MyPrimaryGenerator::GeneratePrimaries(G4Event *anEvent)
     fParticleGun->SetParticlePosition(sourcePosition);
     // Set particle momentum direction
     fParticleGun->SetParticleMomentumDirection(randomDirection);
-    
-    fParticleGun->SetParticleEnergy(1.0*MeV);
+    // Set particle energy
+    fParticleGun->SetParticleEnergy(0.5*MeV);
+    // Set particle gun 
     fParticleGun->SetParticleDefinition(particle);
-
-
 
   }
 

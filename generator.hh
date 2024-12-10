@@ -27,6 +27,7 @@ class MyPrimaryGenerator : public G4VUserPrimaryGeneratorAction
     G4ThreeVector fConeAxis;
     G4double fConeAngle;
     G4double fConeApexRadius;
+    G4String fParticleName;
 };
 
 #endif

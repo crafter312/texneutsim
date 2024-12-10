@@ -3,6 +3,7 @@
 
 #include "G4UserSteppingAction.hh"
 #include "G4Step.hh"
+#include "G4Neutron.hh"
 
 #include "construction.hh"
 #include "event.hh"

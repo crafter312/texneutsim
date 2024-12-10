@@ -21,102 +21,108 @@ void ScintillatorSD::Initialize(G4HCofThisEvent *hce)
 G4bool ScintillatorSD::ProcessHits(G4Step *step, G4TouchableHistory *ROhist)
 { 
 
+  // get the event number
+  G4int evt = G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
+
   // Get the current track
   G4Track* track = step->GetTrack();
 
   // get the particle name and print information about the interaction
   auto particleName = track->GetDefinition()->GetParticleName();
+  
   if (particleName == "neutron") {
-    std::cout << "Neutron interaction detected!" << std::endl;
+    //std::cout << "Neutron interaction detected!" << std::endl;
     const G4VProcess* process = step->GetPostStepPoint()->GetProcessDefinedStep();
     if (process) {
       G4String processName = process->GetProcessName();
-      std::cout << "Process: " << processName << std::endl;
+      //std::cout << "Process: " << processName << std::endl;
 
-      if (processName == "neutronInelastic" || processName == "nCapture" || processName == "hadElastic") {
-        std::cout << "Neutron interacted via: " << processName << std::endl;
-      }
+      //if (processName == "neutronInelastic" || processName == "nCapture" || processName == "hadElastic") {
+      //  std::cout << "Neutron interacted via: " << processName << std::endl;
+      //}
     }
-
+    
+    
     // Check if any secondaries are produced in this step
     const std::vector<const G4Track*>* secondaries = step->GetSecondaryInCurrentStep();
     if (secondaries->size() > 0) {
       
-      std::cout << "Number of secondaries: " << secondaries->size() << std::endl;
+      //std::cout << "Number of secondaries: " << secondaries->size() << std::endl;
 
       for (const auto& secondary : *secondaries) {
         // Get secondary particle information
-        auto secondaryName = secondary->GetDefinition()->GetParticleName();
-        auto secondaryEnergy = secondary->GetKineticEnergy();
-        std::cout << "Secondary: " << secondaryName 
-                  << ", Energy: " << secondaryEnergy / MeV << " MeV" << std::endl;
+        //auto secondaryName = secondary->GetDefinition()->GetParticleName();
+        //auto secondaryEnergy = secondary->GetKineticEnergy();
+        //std::cout << "Secondary: " << secondaryName 
+        //          << ", Energy: " << secondaryEnergy / MeV << " MeV" << std::endl;
 
-        // Optionally, calculate energy deposition from secondaries
       }
-    }
+    } 
   }
 
-
+  // if nothing happened during the hit return 0
   G4double energyDeposit = step->GetTotalEnergyDeposit();
   if (energyDeposit == 0) return false;
 
-  
-  // Get particle and parent information
-  G4int trackID = track->GetTrackID();   // ID of this particle
-  G4int parentID = track->GetParentID(); // Parent ID
-  // particleName = track->GetDefinition()->GetParticleName();
-
-  /*G4cout << "trackID " << trackID
-         << ", parentID " << parentID 
-         << ", particleName " << particleName
-         << G4endl;*/
-
-  /*// Check if this is a secondary or primary
-  G4String primaryParticle = "Unknown";
-  if (parentID == 0) {
-    primaryParticle = particleName; // This is the primary particle
-  } else {
-    // Get the primary particle type from the parent history
-    const G4Track* primaryTrack = track;
-    //for(int i=0; i<50; i++){
-    while (primaryTrack->GetParentID() != parentID) {
-      primaryTrack = primaryTrack->GetStep()->GetTrack();
-      //G4cout<< primaryTrack->GetParentID() << G4endl;
-    }
-    primaryParticle = primaryTrack->GetDefinition()->GetParticleName();
-  }*/
-
-  //G4cout << "primaryParticle " << primaryParticle << G4endl;
-
-  // Get the particle type
-  //G4String particleName = step->GetTrack()->GetDefinition()->GetParticleName();
-
-  
   // define a new hit in the scintillator
   ScintillatorHit* newHit = new ScintillatorHit();
 
+  // Get particle and parent information
+  G4int trackID = track->GetTrackID();   // ID of this particle
+  G4int parentID = track->GetParentID(); // Parent ID
+  //G4Track *decayTrack = track->GetParentTrack(parentID);
+  //G4cout << "trackID " << trackID << ", parentID " << parentID  << ", particleName " << particleName << G4endl;
+  
   // Get the copy number of the volume
   G4int copyNumber = step->GetPreStepPoint()->GetTouchable()->GetCopyNumber(); // Copy number of this volume
 
   // Get the position of the current volume
   G4ThreeVector HitPosition = step->GetPreStepPoint()->GetPosition();
-  G4ThreeVector DetPosition = fCopyPositions[copyNumber]; /*step->GetPreStepPoint()
-                                      ->GetTouchable()
-                                      ->GetHistory()
-                                      ->GetTopTransform()
-                                      .TransformPoint(HitPosition);*/
+  G4ThreeVector DetPosition = fCopyPositions[copyNumber]; 
+
+  // get the position of origination of particle
+  G4ThreeVector originationPosition = track->GetVertexPosition();
+
+  // get the time of originiation of particle
+  //G4double originationTime = track->GetVertexTime();
+
+  // get the energy of origination of partilce
+  G4double originationEnergy = track->GetVertexKineticEnergy(); 
+
+  G4double psptime = step->GetPreStepPoint()->GetGlobalTime();
+  G4double gtime = track->GetGlobalTime();
+
+  //if(parentID==0) {
+  /*
+    G4cout << "ParticleName: " << particleName
+              << ", PSP time: " << psptime << " ns"
+              << ", track gtime: " << gtime << " ns"
+              << ", trackID: " << trackID
+              << ", Production Position: " << originationPosition
+              //<< ", trackID: " << track->GetTrackID() 
+              << ", parentID: " << parentID
+            //<< ", Production Time: " << originationTime << " ns"
+              << ", Production Energy: " << originationEnergy / CLHEP::MeV << " MeV" << G4endl;
+  //}*/
 
 
-  newHit->SetTime(step->GetPreStepPoint()->GetGlobalTime());
-  newHit->SetEnergy(energyDeposit);
+  // write the data from the hit to the hit collection
+  newHit->SetEvent(evt);
+  newHit->SetIsPrimary(parentID);
+  newHit->SetTime(track->GetGlobalTime());
+  newHit->SetInitialEnergy(originationEnergy);
+  newHit->SetDetEnergy(energyDeposit);
   newHit->SetParticleName(particleName);
   newHit->SetCopyNumber(copyNumber);
   newHit->SetHitPosition(HitPosition);
   newHit->SetDetectorPosition(DetPosition);
+  //newHit->SetParticleOriginTime();
+  //newHit->SetParticleOriginPos();
+  
 
-
-
+  // add hit to hit collection
   fHitsCollection->insert(newHit);
+
   return true;
 
   /////////////////////////////////////*

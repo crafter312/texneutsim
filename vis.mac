@@ -9,3 +9,8 @@
 /vis/scene/add/eventID
 /vis/scene/endOfEventAction accumulate 1
 /vis/ogl/set/displayListLimit 5000000
+
+/vis/filtering/trajectories/create/particleFilter
+/vis/filtering/trajectories/particleFilter-0/add nu_e
+/vis/filtering/trajectories/particleFilter-0/add anti_nu_e
+/vis/filtering/trajectories/particleFilter-0/invert true

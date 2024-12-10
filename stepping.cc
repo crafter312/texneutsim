@@ -18,7 +18,25 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
 
   if(volume != fScoringVolume) return;
 
-  G4double edep = step->GetTotalEnergyDeposit();
-  fEventAction->AddEdep(edep);
+  //G4double edep = step->GetTotalEnergyDeposit();
+  //fEventAction->AddEdep(edep);
+
+
+
+
+  // here we are trying to find the time at which a neutron is created and where. 
+  /*auto secondaries = step->GetSecondaryInCurrentStep();
+  
+  for (const auto& secondary : *secondaries) {
+    if (secondary->GetDefinition() == G4Neutron::Definition()) {
+      auto secondarytrack = secondary;
+      G4cout << "Neutron created: " << G4endl
+              << " trackID: " << secondarytrack->GetTrackID() << G4endl
+              << "  Initial Energy: " << secondarytrack->GetKineticEnergy() / MeV << " MeV" << G4endl
+              << "  Creation Time: " << secondarytrack->GetGlobalTime() / ns << " ns" << G4endl
+              << "  Creation Position: " << secondarytrack->GetPosition() << G4endl;
+    }
+  }
+  */
   
 }
