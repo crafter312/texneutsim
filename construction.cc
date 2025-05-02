@@ -173,7 +173,6 @@ void MyDetectorConstruction::DefineMaterials()
   // silicone pad settings
   G4double pad_Energy[] = { 7.0*eV , 7.07*eV, 7.14*eV };
   G4int padnum = sizeof(pad_Energy)/sizeof(G4double);
-  assert(sizeof(pad_AbsLength) == sizeof(pad_Energy));
   G4double opticalpadsilicone_RIND[]={1.49,1.49,1.49};
   assert(sizeof(opticalpadsilicone_RIND) == sizeof(pad_Energy));
   G4double opticalpadsilicone_AbsLength[]={420.*cm,420.*cm,420.*cm};
