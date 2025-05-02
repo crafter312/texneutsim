@@ -1,6 +1,4 @@
-This README is for the examplesim Geant4 simulation. This code is inspired by
-tutorials from the Physics Matters Youtube channel. This code follows
-the tutorial video 1-13. 
+This README is for the texneutsim Geant4 simulation.
 
 To use this code, after downloading: 
 $ cd build	
