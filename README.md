@@ -15,10 +15,10 @@ Now that the package is built we can run it from the build directory. To run
 there are several options. The first is to run it as is with the visualization.
 To do this,
 simply do
-$ ./examplesim
+$ ./texneutsim
 This will execute the code with the vis.mac macro file. To run it with any 
 specific macro file, use your intended macro file as the second argument with
 after the examplesim execution, i.e., 
-$ ./examplesim run.mac
+$ ./texneutsim run.mac
 
 In this branch we will add radioactive decay and a scintillation type material
