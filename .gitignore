@@ -1,5 +1,13 @@
 # ignore all files in any directory named build
 build/
 
-#ignore all ROOT files
+# ignore all ROOT files
 *.root
+
+# ignore cmake files
+CMakeCache.txt
+CMakeFiles/*
+Makefile
+cmake_install.cmake
+
+texneutsim
