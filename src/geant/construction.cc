@@ -232,7 +232,17 @@ void MyDetectorConstruction::ConstructScintillator()
   G4double housing_y = fScint_y+2.*fD_mtl;
   G4double housing_z = fScint_z+2.*fD_mtl;
 
+	G4double counter_x = (xoffset*2.)+housing_y;
+	G4double counter_y = housing_x;
+	G4double counter_z = 1.*mm;
+
   checkGeometry = true;
+
+	///////////////////////////// Neutron counter
+	G4ThreeVector counter_loc = G4ThreeVector(0.,0.,-zoffset-(housing_z/2.)-(counter_z/2.));
+	G4Box* fCounter_box = new G4Box("Counter Box",counter_x/2.,counter_y/2.,counter_z/2.);
+	fCounter_log = new G4LogicalVolume(fCounter_box,worldMat,"counter_log",0,0,0);
+	new G4PVPlacement(0,counter_loc,fCounter_log,"phys_Counter", logicWorld,false,0,checkGeometry);
 
   ///////////////////////////// Housing
   G4Box* outerBox = new G4Box("Outer Box",housing_x/2.,housing_y/2.,housing_z/2.);
@@ -509,6 +519,7 @@ void MyDetectorConstruction::ConstructScintillator()
   //physScintillator = new G4PVPlacement(0,G4ThreeVector(0.,0.,0.),logicScintillator,"physScintillator",logicWorld, false, 0, true);
   //fScoringVolume = logicScintillator;
   fScoringVolume = fScint_log;
+	fCountingVolume = fCounter_log;
   
   VisAttributes();
 
@@ -583,5 +594,8 @@ void MyDetectorConstruction::VisAttributes()
   G4VisAttributes* pad_va = new G4VisAttributes(G4Colour(0.4,1.,0.4,0.4));
   pad_va->SetForceSolid(false);
   fPad_log->SetVisAttributes(pad_va);
+
+	G4VisAttributes* counter_va = new G4VisAttributes(G4Colour(1.,1.,0.)); // yellow
+	fCounter_log->SetVisAttributes(counter_va);
 }
 

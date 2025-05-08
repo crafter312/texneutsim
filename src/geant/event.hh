@@ -21,9 +21,11 @@ class MyEventAction : public G4UserEventAction
     virtual void EndOfEventAction(const G4Event*);
 
     void AddEdep(G4double edep);
+		void ToggleNeutron() { fHasNeut = true; }
 
   private:
     G4double fEdep;
+		bool fHasNeut;
 };
 
 #endif

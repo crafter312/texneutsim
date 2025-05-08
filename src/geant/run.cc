@@ -44,8 +44,9 @@ MyRunAction::MyRunAction()
 
 	// fourth root tree (for event-wise parameters)
 	man->CreateNtuple("Events","Events");
-	man->CreateNtupleIColumn("hasNeutronHits");
+	man->CreateNtupleIColumn("isNeutDet");
 	man->CreateNtupleIColumn("neutHitMult");
+	man->CreateNtupleIColumn("isNeutInVolume");
 	man->FinishNtuple(3);
 
 }

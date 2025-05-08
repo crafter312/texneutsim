@@ -6,6 +6,7 @@
 MyEventAction::MyEventAction(MyRunAction*)
 {
   fEdep = 0.;
+	fHasNeut = false;
 }
 
 MyEventAction::~MyEventAction()
@@ -14,6 +15,7 @@ MyEventAction::~MyEventAction()
 void MyEventAction::BeginOfEventAction(const G4Event*)
 {
   fEdep = 0.;
+	fHasNeut = false;
 }
 
 void MyEventAction::EndOfEventAction(const G4Event *event)
@@ -76,6 +78,7 @@ void MyEventAction::EndOfEventAction(const G4Event *event)
 	// write hit wise information
 	man->FillNtupleIColumn(3,0,(int)(Nneuts>0));
 	man->FillNtupleIColumn(3,1,Nneuts);
+	man->FillNtupleIColumn(3,2,(int)fHasNeut);
 	man->AddNtupleRow(3);
 
 }
