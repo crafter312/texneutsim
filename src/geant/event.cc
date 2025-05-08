@@ -33,6 +33,7 @@ void MyEventAction::EndOfEventAction(const G4Event *event)
 
 
   // loop over all hits and write them out to disk
+	int Nneuts = 0;
   for (size_t i = 0; i < hitsCollection->entries(); ++i) {
     ScintillatorHit* hit = (*hitsCollection)[i];
 
@@ -68,8 +69,14 @@ void MyEventAction::EndOfEventAction(const G4Event *event)
       man->AddNtupleRow(2);
     }
 
+		if(hit->GetParticleName() == "neutron") Nneuts++;
 
   }
+
+	// write hit wise information
+	man->FillNtupleIColumn(3,0,(int)(Nneuts>0));
+	man->FillNtupleIColumn(3,1,Nneuts);
+	man->AddNtupleRow(3);
 
 }
 

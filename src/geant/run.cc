@@ -42,6 +42,12 @@ MyRunAction::MyRunAction()
   man->CreateNtupleIColumn("fCopyNumber"); // 11
   man->FinishNtuple(2);
 
+	// fourth root tree (for event-wise parameters)
+	man->CreateNtuple("Events","Events");
+	man->CreateNtupleIColumn("hasNeutronHits");
+	man->CreateNtupleIColumn("neutHitMult");
+	man->FinishNtuple(3);
+
 }
 
 MyRunAction::~MyRunAction()
