@@ -3,10 +3,11 @@
 
 #include <vector>
 
-MyEventAction::MyEventAction(MyRunAction*)
+MyEventAction::MyEventAction(MyRunAction* _runAction)
 {
   fEdep = 0.;
 	fHasNeut = false;
+	runAction = _runAction;
 }
 
 MyEventAction::~MyEventAction()
@@ -14,6 +15,7 @@ MyEventAction::~MyEventAction()
 
 void MyEventAction::BeginOfEventAction(const G4Event*)
 {
+	runAction->Clear();
   fEdep = 0.;
 	fHasNeut = false;
 }
@@ -71,7 +73,23 @@ void MyEventAction::EndOfEventAction(const G4Event *event)
       man->AddNtupleRow(2);
     }
 
-		if(hit->GetParticleName() == "neutron") Nneuts++;
+		if(hit->GetParticleName() == "neutron") {
+			Nneuts++;
+
+			// fill vectors with neutron information
+			runAction->FillVectors(
+				hit->GetIsPrimary(),
+				hit->GetTime(),
+				hit->GetInitialEnergy(),
+				hit->GetDetEnergy(),
+				hit->GetHitPosition()[0],
+				hit->GetHitPosition()[1],
+				hit->GetHitPosition()[2],
+				hit->GetDetectorPosition()[0],
+				hit->GetDetectorPosition()[1],
+				hit->GetDetectorPosition()[2]
+			);
+		}
 
   }
 

@@ -26,6 +26,7 @@ class MyEventAction : public G4UserEventAction
   private:
     G4double fEdep;
 		bool fHasNeut;
+		MyRunAction* runAction;
 };
 
 #endif
