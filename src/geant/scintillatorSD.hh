@@ -2,6 +2,7 @@
 #define SCINTILLATORSD_HH
 
 #include <map>
+#include <vector>
 
 #include "G4VSensitiveDetector.hh"
 #include "G4RunManager.hh"
@@ -11,6 +12,7 @@
 #include "G4SDManager.hh"
 
 #include "scinthit.hh"
+#include "scinthit_psum.hh"
 #include "G4AnalysisManager.hh"
 #include "run.hh"
 #include "construction.hh"
@@ -33,7 +35,9 @@ class ScintillatorSD : public G4VSensitiveDetector
 
   private:
     G4THitsCollection<ScintillatorHit>* fHitsCollection;
+		G4THitsCollection<ScintillatorHitPSum>* fPSumHitsCollection;
     std::map<G4int, G4ThreeVector> fCopyPositions;
+    std::vector<G4int> hitIDs;
 
 };
 

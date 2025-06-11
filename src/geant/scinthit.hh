@@ -47,7 +47,6 @@ class ScintillatorHit : public G4VHit
     G4double fTime;
     G4double fInitialEnergy;
     G4double fDetEnergy;
-    G4ThreeVector fPosition;
     G4String fParticleName;
     G4int fCopyNumber;
     G4ThreeVector fDetectorPosition;

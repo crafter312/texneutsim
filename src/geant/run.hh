@@ -19,16 +19,14 @@ class MyRunAction : public G4UserRunAction
 
 		// Vector management functions
 		void Clear();
-		void FillVectors(G4int, G4double, G4double, G4double, G4double, G4double, G4double, G4double, G4double, G4double);
+		void FillVectors(G4int, G4double, G4double, G4int, G4double, G4double, G4double);
+		size_t GetSize() { return event.size(); }
 
 	private:
-		std::vector<G4int> isPrimary;
+		std::vector<G4int> event;
 		std::vector<G4double> time;
-		std::vector<G4double> initialEnergy;
 		std::vector<G4double> detEnergy;
-		std::vector<G4double> hitPosX;
-		std::vector<G4double> hitPosY;
-		std::vector<G4double> hitPosZ;
+		std::vector<G4int> copyNumber;
 		std::vector<G4double> detPosX;
 		std::vector<G4double> detPosY;
 		std::vector<G4double> detPosZ;

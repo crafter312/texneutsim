@@ -44,19 +44,19 @@ MyRunAction::MyRunAction()
 
 	// fourth root tree (for event-wise parameters)
 	man->CreateNtuple("Events","Events");
-	man->CreateNtupleIColumn("isNeutDet");                     // 1
-	man->CreateNtupleIColumn("neutHitMult");                   // 2
-	man->CreateNtupleIColumn("isNeutInVolume");                // 3
-  man->CreateNtupleIColumn("fIsPrimary", isPrimary);         // 4
-  man->CreateNtupleDColumn("fTime", time);                   // 5
-  man->CreateNtupleDColumn("fInitialEnergy", initialEnergy); // 6
-  man->CreateNtupleDColumn("fDetEnergy", detEnergy);         // 7
-  man->CreateNtupleDColumn("fHitPosX", hitPosX);             // 8
-  man->CreateNtupleDColumn("fHitPosY", hitPosY);             // 9
-  man->CreateNtupleDColumn("fHitPosZ", hitPosZ);             // 10
-  man->CreateNtupleDColumn("fDetPosX", detPosX);             // 11
-  man->CreateNtupleDColumn("fDetPosY", detPosY);             // 12
-  man->CreateNtupleDColumn("fDetPosZ", detPosZ);             // 13
+	man->CreateNtupleIColumn("isNeutDet");                     // 0
+	man->CreateNtupleIColumn("neutHitMult");                   // 1
+	man->CreateNtupleIColumn("isNeutInVolume");                // 2
+	man->CreateNtupleIColumn("firstFrontInd");                 // 3
+	man->CreateNtupleIColumn("maxEdepInd");                    // 4
+	man->CreateNtupleIColumn("minTimeind");                    // 5
+	man->CreateNtupleIColumn("fEvent", event);                 // 6
+  man->CreateNtupleDColumn("fTime", time);                   // 7
+  man->CreateNtupleDColumn("fDetEnergy", detEnergy);         // 8
+	man->CreateNtupleIColumn("fCopyNumber", copyNumber);       // 9
+  man->CreateNtupleDColumn("fDetPosX", detPosX);             // 10
+  man->CreateNtupleDColumn("fDetPosY", detPosY);             // 11
+  man->CreateNtupleDColumn("fDetPosZ", detPosZ);             // 12
 	man->FinishNtuple(3);
 }
 
@@ -87,28 +87,22 @@ void MyRunAction::EndOfRunAction(const G4Run*)
 
 void MyRunAction::Clear()
 {
-	isPrimary.clear();
+	event.clear();
 	time.clear();
-	initialEnergy.clear();
 	detEnergy.clear();
-	hitPosX.clear();
-	hitPosY.clear();
-	hitPosZ.clear();
+	copyNumber.clear();
 	detPosX.clear();
 	detPosY.clear();
 	detPosZ.clear();
 }
 
 // Note the order of the input arguments, make sure it is done correctly if you use this function
-void MyRunAction::FillVectors(G4int isP, G4double t, G4double initE, G4double detE, G4double hPosX, G4double hPosY, G4double hPosZ, G4double dPosX, G4double dPosY, G4double dPosZ)
+void MyRunAction::FillVectors(G4int ev, G4double t, G4double detE, G4int cpy, G4double dPosX, G4double dPosY, G4double dPosZ)
 {
-	isPrimary.push_back(isP);
+	event.push_back(ev);
 	time.push_back(t);
-	initialEnergy.push_back(initE);
 	detEnergy.push_back(detE);
-	hitPosX.push_back(hPosX);
-	hitPosY.push_back(hPosY);
-	hitPosZ.push_back(hPosZ);
+	copyNumber.push_back(cpy);
 	detPosX.push_back(dPosX);
 	detPosY.push_back(dPosY);
 	detPosZ.push_back(dPosZ);

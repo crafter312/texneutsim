@@ -3,6 +3,7 @@
 ScintillatorSD::ScintillatorSD(const G4String name) : G4VSensitiveDetector(name), fHitsCollection(nullptr)
 {
   collectionName.insert("ScintillatorHitsCollection");
+	collectionName.insert("ScintillatorProtonSummedHitsCollection");
 }
 
 
@@ -12,9 +13,18 @@ ScintillatorSD::~ScintillatorSD()
 
 void ScintillatorSD::Initialize(G4HCofThisEvent *hce)
 {
+	// default hits
   fHitsCollection = new G4THitsCollection<ScintillatorHit>(SensitiveDetectorName, collectionName[0]);
   G4int hcID = G4SDManager::GetSDMpointer()->GetCollectionID(collectionName[0]);
   hce->AddHitsCollection(hcID, fHitsCollection);
+
+	// summed (per crystal) proton hits
+	fPSumHitsCollection = new G4THitsCollection<ScintillatorHitPSum>(SensitiveDetectorName, collectionName[1]);
+	hcID = G4SDManager::GetSDMpointer()->GetCollectionID(collectionName[1]);
+  hce->AddHitsCollection(hcID, fPSumHitsCollection);
+
+  // clear hitID vector
+  hitIDs.clear();
 }
 
 
@@ -59,6 +69,18 @@ G4bool ScintillatorSD::ProcessHits(G4Step *step, G4TouchableHistory *ROhist)
       }
     } 
   }
+/*
+	if (particleName == "proton") {
+		const G4VProcess* process = step->GetPreStepPoint()->GetProcessDefinedStep();
+    if (process) {
+      G4String processName = process->GetProcessName();
+      std::cout << "Process: " << processName << std::endl;
+
+      //if (processName == "neutronInelastic" || processName == "nCapture" || processName == "hadElastic") {
+      //  std::cout << "Neutron interacted via: " << processName << std::endl;
+      //}
+    }
+	}*/
 
   // if nothing happened during the hit return 0
   G4double energyDeposit = step->GetTotalEnergyDeposit();
@@ -110,8 +132,8 @@ G4bool ScintillatorSD::ProcessHits(G4Step *step, G4TouchableHistory *ROhist)
   newHit->SetEvent(evt);
   newHit->SetIsPrimary(parentID);
   newHit->SetTime(track->GetGlobalTime());
-  newHit->SetInitialEnergy(originationEnergy);
-  newHit->SetDetEnergy(energyDeposit);
+  newHit->SetInitialEnergy(originationEnergy/MeV);
+  newHit->SetDetEnergy(energyDeposit/MeV);
   newHit->SetParticleName(particleName);
   newHit->SetCopyNumber(copyNumber);
   newHit->SetHitPosition(HitPosition);
@@ -122,6 +144,30 @@ G4bool ScintillatorSD::ProcessHits(G4Step *step, G4TouchableHistory *ROhist)
 
   // add hit to hit collection
   fHitsCollection->insert(newHit);
+
+  /******** PROTON SUMMING HITS ********/
+
+  // return early if not proton
+  if (particleName != "proton") return true;
+
+	// search for already existing hit, increment if found
+	for (size_t i = 0; i < hitIDs.size(); i++) {
+		if (copyNumber != hitIDs[i]) continue;
+		((ScintillatorHitPSum*)fPSumHitsCollection->GetHit(i))->IncrementE(energyDeposit/MeV);
+		return true;
+	}
+
+  // make new hit if one with the relevant copy number doesn't already exist
+	ScintillatorHitPSum* newHitSum = new ScintillatorHitPSum();
+	newHitSum->SetEvent(evt);
+  newHitSum->SetTime(track->GetGlobalTime());
+  newHitSum->SetDetEnergy(energyDeposit/MeV);
+  newHitSum->SetCopyNumber(copyNumber);
+  newHitSum->SetDetectorPosition(DetPosition);
+
+	// Add new hit
+	hitIDs.push_back(copyNumber);
+	fPSumHitsCollection->insert(newHitSum);
 
   return true;
 

@@ -221,8 +221,6 @@ void MyDetectorConstruction::ConstructScintillator()
   G4double fPad_y = fCube_y;
   G4double fPad_z = fCube_z;
 
-  G4double fCube_mult = 6;
-
   G4double fScint_x = fCube_x*fCube_mult + (fCube_mult+1)*fPad_x;
   G4double fScint_y = fCube_y;
   G4double fScint_z = fCube_z;
@@ -313,16 +311,16 @@ void MyDetectorConstruction::ConstructScintillator()
         padSkin->SetFinish(polished);
         padSkin->SetModel(glisur);
 
-        G4double pp[] = {2.0*eV, 3.5*eV};
-        G4int num = sizeof(pp)/sizeof(G4double);
-        G4double reflectivity[] = {1., 1.};
-        assert(sizeof(reflectivity) == sizeof(pp));
-        G4double efficiency[] = {0.0, 0.0};
-        assert(sizeof(efficiency) == sizeof(pp));
+        G4double pp2[] = { 2.0*eV, 3.5*eV };
+        G4int num2 = sizeof(pp2)/sizeof(G4double);
+        G4double reflectivity2[] = {1., 1.};
+        assert(sizeof(reflectivity2) == sizeof(pp2));
+        G4double efficiency2[] = {0.0, 0.0};
+        assert(sizeof(efficiency2) == sizeof(pp2));
         
         G4MaterialPropertiesTable *scintWrapProperty = new G4MaterialPropertiesTable();
-        scintWrapProperty->AddProperty("REFLECTIVITY",pp,reflectivity,num);
-        scintWrapProperty->AddProperty("EFFICIENCY",pp,efficiency,num);
+        scintWrapProperty->AddProperty("REFLECTIVITY",pp2,reflectivity2,num2);
+        scintWrapProperty->AddProperty("EFFICIENCY",pp2,efficiency2,num2);
         padSkin->SetMaterialPropertiesTable(scintWrapProperty);
       }
     }
@@ -363,17 +361,17 @@ void MyDetectorConstruction::ConstructScintillator()
         cubeSkin->SetFinish(groundair);
         cubeSkin->SetModel(glisur);
 
-        G4double pp[] = {2.0*eV, 3.5*eV};
-        G4int num = sizeof(pp)/sizeof(G4double);
-        G4double reflectivity[] = {1., 1.};
-        assert(sizeof(reflectivity) == sizeof(pp));
-        G4double efficiency[] = {0.0, 0.0};
-        assert(sizeof(efficiency) == sizeof(pp));
+        G4double pp2[] = {2.0*eV, 3.5*eV};
+        G4int num2 = sizeof(pp2)/sizeof(G4double);
+        G4double reflectivity2[] = {1., 1.};
+        assert(sizeof(reflectivity2) == sizeof(pp2));
+        G4double efficiency2[] = {0.0, 0.0};
+        assert(sizeof(efficiency2) == sizeof(pp2));
         
         G4MaterialPropertiesTable* cubeSkinProperty = new G4MaterialPropertiesTable();
 
-        cubeSkinProperty->AddProperty("REFLECTIVITY",pp,reflectivity,num);
-        cubeSkinProperty->AddProperty("EFFICIENCY",pp,efficiency,num);
+        cubeSkinProperty->AddProperty("REFLECTIVITY",pp2,reflectivity2,num2);
+        cubeSkinProperty->AddProperty("EFFICIENCY",pp2,efficiency2,num2);
         cubeSkin->SetMaterialPropertiesTable(cubeSkinProperty);
       }
     }
@@ -466,18 +464,18 @@ void MyDetectorConstruction::ConstructScintillator()
         muSkin->SetFinish(polished);
         muSkin->SetModel(glisur);
 
-        G4double pp[] = {1.0*eV, 10.*eV};
-        num = sizeof(pp)/sizeof(G4double);
-        G4double reflectivity[] = {1., 1.};
-        assert(sizeof(reflectivity) == sizeof(pp));
-        G4double efficiency[] = {0.0, 0.0};
-        assert(sizeof(efficiency) == sizeof(pp));
+        G4double pp2[] = {1.0*eV, 10.*eV};
+        G4int num2 = sizeof(pp2)/sizeof(G4double);
+        G4double reflectivity2[] = {1., 1.};
+        assert(sizeof(reflectivity2) == sizeof(pp2));
+        G4double efficiency2[] = {0.0, 0.0};
+        assert(sizeof(efficiency2) == sizeof(pp2));
 
         G4MaterialPropertiesTable* muSkinProperty 
         = new G4MaterialPropertiesTable();
 
-        muSkinProperty->AddProperty("REFLECTIVITY",pp,reflectivity,num);
-        muSkinProperty->AddProperty("EFFICIENCY",pp,efficiency,num);
+        muSkinProperty->AddProperty("REFLECTIVITY",pp2,reflectivity2,num2);
+        muSkinProperty->AddProperty("EFFICIENCY",pp2,efficiency2,num2);
         muSkin->SetMaterialPropertiesTable(muSkinProperty);
 
       }
