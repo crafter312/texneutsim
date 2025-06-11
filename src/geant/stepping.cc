@@ -14,6 +14,13 @@ void MySteppingAction::UserSteppingAction(const G4Step *step)
 
   const MyDetectorConstruction *detectorConstruction = static_cast<const MyDetectorConstruction*> (G4RunManager::GetRunManager()->GetUserDetectorConstruction());
 
+	G4LogicalVolume *fCountingVolume = detectorConstruction->GetCountingVolume();
+	G4String particleName = step->GetTrack()->GetParticleDefinition()->GetParticleName();
+
+	if((volume == fCountingVolume) && (particleName == "neutron")) {
+		fEventAction->ToggleNeutron();
+	}
+
   G4LogicalVolume *fScoringVolume = detectorConstruction->GetScoringVolume();
 
   if(volume != fScoringVolume) return;

@@ -1,0 +1,39 @@
+#ifndef SCINTHITPSUM_HH
+#define SCINTHITPSUM_HH
+
+#include "G4VHit.hh"
+#include "G4THitsCollection.hh"
+#include "G4ThreeVector.hh"
+
+class ScintillatorHitPSum : public G4VHit 
+{
+  public:
+    ScintillatorHitPSum();
+    virtual ~ScintillatorHitPSum();
+
+    // Setters
+    void SetEvent(const G4int& event) { fEvent = event; }
+    void SetTime(const G4double& time) { fTime = time; }
+    void SetDetEnergy(const G4double& energy) { fDetEnergy = energy; }
+    void SetCopyNumber(const G4int& number) { fCopyNumber = number; }
+    void SetDetectorPosition(const G4ThreeVector& detpos) { fDetectorPosition = detpos; }
+
+    // Getters
+    G4int GetEvent() const { return fEvent; }
+    G4double GetTime() const { return fTime; }
+    G4double GetDetEnergy() const { return fDetEnergy; }
+    G4int GetDetCopyNumber() const { return fCopyNumber; }
+    G4ThreeVector GetDetectorPosition() const { return fDetectorPosition; }
+
+    // Increment energy
+    void IncrementE(G4double de) { fDetEnergy += de; };
+
+  private:
+    G4int fEvent;
+    G4double fTime;
+    G4double fDetEnergy;
+    G4int fCopyNumber;
+    G4ThreeVector fDetectorPosition;
+};
+
+#endif

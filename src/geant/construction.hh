@@ -38,10 +38,9 @@ class MyDetectorConstruction : public G4VUserDetectorConstruction
     ~MyDetectorConstruction(); // destructor
 
     G4LogicalVolume *GetScoringVolume() const { return fScoringVolume; }
+		G4LogicalVolume *GetCountingVolume() const { return fCountingVolume; }
 
     virtual G4VPhysicalVolume *Construct(); // this is the main function that constructs the detector geometry
-
-    
     
   private:
     G4Box *solidWorld, *solidRadiator, *solidDetector,*fScint_box,*fPad_box;
@@ -49,7 +48,7 @@ class MyDetectorConstruction : public G4VUserDetectorConstruction
     G4Tubs *fPhotocath,*fPmt,*fMuShield_tub;
     G4LogicalVolume *logicWorld, *logicRadiator, *logicDetector, 
                     *fScint_log,*fHousing_log,*fPmt_log,*fPhotocath_log,
-                    *fMuShield_log,*fPad_log;
+                    *fMuShield_log,*fPad_log, *fCounter_log;
     G4VPhysicalVolume *physWorld, *physRadiator, *physDetector, 
                       *cube_phys,*fmuMetal_phys,*pad;
 
@@ -61,6 +60,7 @@ class MyDetectorConstruction : public G4VUserDetectorConstruction
     G4GenericMessenger *fMessenger;
 
     G4LogicalVolume *fScoringVolume;
+		G4LogicalVolume *fCountingVolume;
 
     G4double xWorld,yWorld,zWorld;
 
