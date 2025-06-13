@@ -19,6 +19,8 @@ class ScintillatorHitPSum : public G4VHit
     void SetDetectorPosition(const G4ThreeVector& detpos) { fDetectorPosition = detpos; }
 
 		void SetTrackOriginVolumeName(const G4String& name) { fOriginVolumeName = name; }
+		void SetCreatorProcessName(const G4String& name) { fCreatorProcessName = name; }
+		void SetParentID(const G4int& id) { fParentID = id; }
 
     // Getters
     G4int GetEvent() const { return fEvent; }
@@ -28,6 +30,8 @@ class ScintillatorHitPSum : public G4VHit
     G4ThreeVector GetDetectorPosition() const { return fDetectorPosition; }
 
 		G4String GetTrackOriginVolumeName() const { return fOriginVolumeName; }
+		G4String GetCreatorProcessName() const { return fCreatorProcessName; }
+		G4int GetParentID() const { return fParentID; }
 
     // Increment energy
     void IncrementE(G4double de) { fDetEnergy += de; };
@@ -41,6 +45,8 @@ class ScintillatorHitPSum : public G4VHit
 
 		// Diagnostic information
 		G4String fOriginVolumeName;
+		G4String fCreatorProcessName;
+		G4int fParentID;
 };
 
 #endif

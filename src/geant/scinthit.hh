@@ -22,7 +22,11 @@ class ScintillatorHit : public G4VHit
     void SetDetectorPosition(const G4ThreeVector& detpos) { fDetectorPosition = detpos; }
     void SetHitPosition(const G4ThreeVector& hitpos) { fHitPosition = hitpos; }
     void SetParticleOriginPos(const G4ThreeVector& originpos) { fParticleOriginPos = originpos; } 
-    void SetParticleOriginTime(const G4double& origintime) { fParticleOriginTime = origintime; } 
+    void SetParticleOriginTime(const G4double& origintime) { fParticleOriginTime = origintime; }
+
+		void SetTrackOriginVolumeName(const G4String& name) { fOriginVolumeName = name; }
+		void SetCreatorProcessName(const G4String& name) { fCreatorProcessName = name; }
+		void SetParentID(const G4int& id) { fParentID = id; }
 
     // Getters
     G4int GetEvent() const { return fEvent; } 
@@ -37,7 +41,9 @@ class ScintillatorHit : public G4VHit
     G4ThreeVector GetParticleOriginPos() const { return fParticleOriginPos; }
     G4double GetParticleOriginTime() const { return fParticleOriginTime; }
 
-
+		G4String GetTrackOriginVolumeName() const { return fOriginVolumeName; }
+		G4String GetCreatorProcessName() const { return fCreatorProcessName; }
+		G4int GetParentID() const { return fParentID; }
     
     
 
@@ -53,6 +59,11 @@ class ScintillatorHit : public G4VHit
     G4ThreeVector fHitPosition;
     G4ThreeVector fParticleOriginPos;
     G4double fParticleOriginTime;
+
+		// Diagnostic information
+		G4String fOriginVolumeName;
+		G4String fCreatorProcessName;
+		G4int fParentID;
 
 
 };

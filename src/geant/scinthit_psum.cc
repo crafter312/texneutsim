@@ -9,6 +9,8 @@ ScintillatorHitPSum::ScintillatorHitPSum()
   fDetectorPosition = G4ThreeVector();
 
 	fOriginVolumeName = "";
+	fCreatorProcessName = "";
+	fParentID = -1;
 }
 
 ScintillatorHitPSum::~ScintillatorHitPSum()

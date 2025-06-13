@@ -112,7 +112,29 @@ void MyEventAction::EndOfEventAction(const G4Event *event)
 		NProtSum++;
 
 		// Diagnostic output
-		//if(NNeut == 0) G4cout << "No neutron hits, getting proton hit origin volume name: " << hit->GetTrackOriginVolumeName() << G4endl;
+		if(NNeut == 0) {
+		//	if(i == 0) G4cout << "No neutron hits, getting proton hit origin information: " << G4endl;
+		//	G4cout << "\torigin volume name: " << hit->GetTrackOriginVolumeName() << G4endl;
+		//	G4cout << "\tcreation process name: " << hit->GetCreatorProcessName() << G4endl;
+		//	G4cout << "\tparent particle ID: " << hit->GetParentID() << G4endl;
+		}
+	}
+
+	// More diagnostic output
+	if((NNeut == 0) && (NProtSum>0)) {
+		bool hasOutputHeader = false;
+		for (size_t i = 0; i < hitsCollection->entries(); ++i) {
+			ScintillatorHit* hit2 = (*hitsCollection)[i];
+			if ((hit2->GetParticleName() == "gamma") && (hit2->GetParentID() != -1)) {
+				/*if (!hasOutputHeader) {
+					G4cout << "Gamma information for production of no-neutron protons:" << G4endl;
+					hasOutputHeader = true;
+				}
+				G4cout << "\torigin volume name: " << hit2->GetTrackOriginVolumeName() << G4endl;
+				G4cout << "\tcreation process name: " << hit2->GetCreatorProcessName() << G4endl;
+				G4cout << "\tparent particle ID: " << hit2->GetParentID() << G4endl;*/
+			}
+		}
 	}
 
 	// Note that this value is for direct neutron hits, and not for
