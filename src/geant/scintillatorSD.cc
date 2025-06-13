@@ -48,7 +48,8 @@ G4bool ScintillatorSD::ProcessHits(G4Step *step, G4TouchableHistory *ROhist)
       //std::cout << "Process: " << processName << std::endl;
 
       //if (processName == "neutronInelastic" || processName == "nCapture" || processName == "hadElastic") {
-      //  std::cout << "Neutron interacted via: " << processName << std::endl;
+      //  std::cout << "Neutron interacted via:" << std::endl;
+			//	process->DumpInfo();
       //}
     }
     
@@ -61,26 +62,24 @@ G4bool ScintillatorSD::ProcessHits(G4Step *step, G4TouchableHistory *ROhist)
 
       for (const auto& secondary : *secondaries) {
         // Get secondary particle information
-        //auto secondaryName = secondary->GetDefinition()->GetParticleName();
-        //auto secondaryEnergy = secondary->GetKineticEnergy();
+        auto secondaryName = secondary->GetDefinition()->GetParticleName();
+        auto secondaryEnergy = secondary->GetKineticEnergy();
         //std::cout << "Secondary: " << secondaryName 
         //          << ", Energy: " << secondaryEnergy / MeV << " MeV" << std::endl;
 
       }
     } 
   }
-/*
-	if (particleName == "proton") {
+	else if (particleName == "proton") {
 		const G4VProcess* process = step->GetPreStepPoint()->GetProcessDefinedStep();
     if (process) {
-      G4String processName = process->GetProcessName();
-      std::cout << "Process: " << processName << std::endl;
-
-      //if (processName == "neutronInelastic" || processName == "nCapture" || processName == "hadElastic") {
-      //  std::cout << "Neutron interacted via: " << processName << std::endl;
-      //}
+      //G4String processName = process->GetProcessName();
+      //std::cout << "Process: " << processName << std::endl;
     }
-	}*/
+	}
+	else if (particleName != "opticalphoton") {
+		//G4cout << "Particle name: " << particleName << G4endl;
+	}
 
   // if nothing happened during the hit return 0
   G4double energyDeposit = step->GetTotalEnergyDeposit();
@@ -164,6 +163,9 @@ G4bool ScintillatorSD::ProcessHits(G4Step *step, G4TouchableHistory *ROhist)
   newHitSum->SetDetEnergy(energyDeposit/MeV);
   newHitSum->SetCopyNumber(copyNumber);
   newHitSum->SetDetectorPosition(DetPosition);
+
+	// save diagnostic information to hit (this is not transfered to the output file)
+	newHitSum->SetTrackOriginVolumeName(step->GetTrack()->GetLogicalVolumeAtVertex()->GetName());
 
 	// Add new hit
 	hitIDs.push_back(copyNumber);

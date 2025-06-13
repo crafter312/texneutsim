@@ -45,6 +45,7 @@ void MyEventAction::EndOfEventAction(const G4Event *event)
 
 
   // loop over all hits and write them out to disk
+	int NNeut = 0;
   for (size_t i = 0; i < hitsCollection->entries(); ++i) {
     ScintillatorHit* hit = (*hitsCollection)[i];
 
@@ -65,6 +66,8 @@ void MyEventAction::EndOfEventAction(const G4Event *event)
     man->FillNtupleSColumn(2,11,hit->GetParticleName());
     man->FillNtupleIColumn(2,12,hit->GetDetCopyNumber());
     man->AddNtupleRow(2);
+
+		if(hit->GetParticleName() == "neutron") NNeut++;
   }
 
 	// get the summed proton hits collection
@@ -73,25 +76,26 @@ void MyEventAction::EndOfEventAction(const G4Event *event)
   if (!hitsCollectionPSum) return;
 
 	// loop over summed proton hits
-	int Nneuts = 0;
+	int NProtSum = 0;
 	double detPosZMin = std::numeric_limits<double>::max();
 	double EdepMax = 0.;
 	double timeMin = std::numeric_limits<double>::max();
   for (size_t i = 0; i < hitsCollectionPSum->entries(); ++i) {
     ScintillatorHitPSum* hit = (*hitsCollectionPSum)[i];
+		if(hit->GetDetEnergy() < 0.3) continue; // hit energy is in MeV
 
 		// save event-wise information
 		if(hit->GetDetectorPosition()[2]<detPosZMin) {
 			detPosZMin = hit->GetDetectorPosition()[2];
-			fFirstFrontInd = Nneuts;
+			fFirstFrontInd = NProtSum;
 		}
 		if(hit->GetDetEnergy()>EdepMax) {
 			EdepMax = hit->GetDetEnergy();
-			fMaxEdepInd = Nneuts;
+			fMaxEdepInd = NProtSum;
 		}
 		if(hit->GetTime()<timeMin) {
 			timeMin = hit->GetTime();
-			fMinTimeind = Nneuts;
+			fMinTimeind = NProtSum;
 		}
 
 		// save neutron hits in vectors
@@ -105,16 +109,26 @@ void MyEventAction::EndOfEventAction(const G4Event *event)
 			hit->GetDetectorPosition()[2]
 		);
 
-		Nneuts++;
+		NProtSum++;
+
+		// Diagnostic output
+		//if(NNeut == 0) G4cout << "No neutron hits, getting proton hit origin volume name: " << hit->GetTrackOriginVolumeName() << G4endl;
 	}
 
+	// Note that this value is for direct neutron hits, and not for
+	// summed proton hits. All the other event-wise information here
+	// is related to the summed proton hits, as this is closer to
+	// what might be measured in an actual experiment. However, I've
+	// saved this value for diagnostic purposes.
+	man->FillNtupleIColumn(3,0,NNeut);
+
 	// write hit wise information
-	man->FillNtupleIColumn(3,0,(int)(Nneuts>0));
-	man->FillNtupleIColumn(3,1,Nneuts);
-	man->FillNtupleIColumn(3,2,(int)fHasNeut);
-	man->FillNtupleIColumn(3,3,fFirstFrontInd);
-	man->FillNtupleIColumn(3,4,fMaxEdepInd);
-	man->FillNtupleIColumn(3,5,fMinTimeind);
+	man->FillNtupleIColumn(3,1,(int)(NProtSum>0));
+	man->FillNtupleIColumn(3,2,NProtSum);
+	man->FillNtupleIColumn(3,3,(int)fHasNeut);
+	man->FillNtupleIColumn(3,4,fFirstFrontInd);
+	man->FillNtupleIColumn(3,5,fMaxEdepInd);
+	man->FillNtupleIColumn(3,6,fMinTimeind);
 	man->AddNtupleRow(3);
 }
 

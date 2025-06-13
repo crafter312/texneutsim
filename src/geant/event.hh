@@ -6,6 +6,7 @@
 #include "G4HCofThisEvent.hh"
 #include "G4THitsCollection.hh"
 #include "G4SDManager.hh"
+#include "G4SystemOfUnits.hh"
 
 #include "G4AnalysisManager.hh"
 

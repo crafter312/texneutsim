@@ -7,6 +7,8 @@ ScintillatorHitPSum::ScintillatorHitPSum()
   fDetEnergy = 0.;
   fCopyNumber = 0;
   fDetectorPosition = G4ThreeVector();
+
+	fOriginVolumeName = "";
 }
 
 ScintillatorHitPSum::~ScintillatorHitPSum()
