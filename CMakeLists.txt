@@ -21,7 +21,10 @@ file(COPY ${MACRO_FILES} DESTINATION ${PROJECT_BINARY_DIR})
 file(GLOB MACRO_FILES "*.dat")
 file(COPY ${MACRO_FILES} DESTINATION ${PROJECT_BINARY_DIR})
 
+# Include the lib/MENATE_R subdirectory
+add_subdirectory(lib/MENATE_R)
+
 add_executable(texneutsim ${PROJECT_SOURCE_DIR_GEANT}/texneutsim.cc ${sources} ${headers})
-target_link_libraries(texneutsim ${Geant4_LIBRARIES})
+target_link_libraries(texneutsim ${Geant4_LIBRARIES} MENATE_R)
 
 add_custom_target(TexNeutSimu DEPENDS sim)
