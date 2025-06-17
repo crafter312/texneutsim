@@ -16,8 +16,9 @@ ScintillatorHit::ScintillatorHit()
   fParticleOriginPos = G4ThreeVector();
   fParticleOriginTime = 0.;
   
-  
-  
+  fOriginVolumeName = "";
+	fCreatorProcessName = "";
+	fParentID = -1;
 }
 
 ScintillatorHit::~ScintillatorHit()

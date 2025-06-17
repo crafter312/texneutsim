@@ -90,7 +90,7 @@ void MyPrimaryGenerator::GeneratePrimaries(G4Event *anEvent)
     // Set particle momentum direction
     fParticleGun->SetParticleMomentumDirection(randomDirection);
     // Set particle energy
-    fParticleGun->SetParticleEnergy(10*MeV); //0.5*MeV previous default
+    fParticleGun->SetParticleEnergy(10*MeV); //0.5*MeV previous default, 8 or 10 MeV for experiment testing
     // Set particle gun 
     fParticleGun->SetParticleDefinition(particle);
 

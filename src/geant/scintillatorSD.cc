@@ -30,61 +30,59 @@ void ScintillatorSD::Initialize(G4HCofThisEvent *hce)
 
 G4bool ScintillatorSD::ProcessHits(G4Step *step, G4TouchableHistory *ROhist)
 { 
+	// Get the event number
+	G4int evt = G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
 
-  // get the event number
-  G4int evt = G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
+	// Get the current track
+	G4Track* track = step->GetTrack();
 
-  // Get the current track
-  G4Track* track = step->GetTrack();
+	// Get the particle name
+	auto particleName = track->GetDefinition()->GetParticleName();
 
-  // get the particle name and print information about the interaction
-  auto particleName = track->GetDefinition()->GetParticleName();
-  
-  if (particleName == "neutron") {
-    //std::cout << "Neutron interaction detected!" << std::endl;
-    const G4VProcess* process = step->GetPostStepPoint()->GetProcessDefinedStep();
-    if (process) {
-      G4String processName = process->GetProcessName();
-      //std::cout << "Process: " << processName << std::endl;
+	// Get the vector of secondary particles
+	const std::vector<const G4Track*>* secondaries = step->GetSecondaryInCurrentStep();
 
-      //if (processName == "neutronInelastic" || processName == "nCapture" || processName == "hadElastic") {
-      //  std::cout << "Neutron interacted via: " << processName << std::endl;
-      //}
-    }
-    
-    
-    // Check if any secondaries are produced in this step
-    const std::vector<const G4Track*>* secondaries = step->GetSecondaryInCurrentStep();
-    if (secondaries->size() > 0) {
-      
-      //std::cout << "Number of secondaries: " << secondaries->size() << std::endl;
+	/******** DIAGNOSTIC INFORMATION ********/
 
-      for (const auto& secondary : *secondaries) {
-        // Get secondary particle information
-        //auto secondaryName = secondary->GetDefinition()->GetParticleName();
-        //auto secondaryEnergy = secondary->GetKineticEnergy();
-        //std::cout << "Secondary: " << secondaryName 
-        //          << ", Energy: " << secondaryEnergy / MeV << " MeV" << std::endl;
+	if (particleName == "neutron") {
+		//std::cout << "Neutron interaction detected!" << std::endl;
+		const G4VProcess* process = step->GetPostStepPoint()->GetProcessDefinedStep();
+		if (process) {
+			G4String processName = process->GetProcessName();
+			//std::cout << "Process: " << processName << std::endl;
 
-      }
-    } 
-  }
-/*
-	if (particleName == "proton") {
+			//if (processName == "neutronInelastic" || processName == "nCapture" || processName == "hadElastic") {
+			//  std::cout << "Neutron interacted via:" << std::endl;
+			//	process->DumpInfo();
+			//}
+		}
+
+		// Check if any secondaries are produced in this step
+		if (secondaries->size() > 0) {
+			//std::cout << "Number of secondaries: " << secondaries->size() << std::endl;
+			for (const auto& secondary : *secondaries) {
+				auto secondaryName = secondary->GetDefinition()->GetParticleName();
+				auto secondaryEnergy = secondary->GetKineticEnergy();
+				//std::cout << "Secondary: " << secondaryName 
+				//          << ", Energy: " << secondaryEnergy / MeV << " MeV" << std::endl;
+			}
+		} 
+	}
+	else if (particleName == "proton") {
 		const G4VProcess* process = step->GetPreStepPoint()->GetProcessDefinedStep();
-    if (process) {
-      G4String processName = process->GetProcessName();
-      std::cout << "Process: " << processName << std::endl;
+		if (process) {
+			//G4String processName = process->GetProcessName();
+			//std::cout << "Process: " << processName << std::endl;
+		}
+	}
+	else if (particleName != "opticalphoton") {
+		//G4cout << "Particle name: " << particleName << G4endl;
+	}
 
-      //if (processName == "neutronInelastic" || processName == "nCapture" || processName == "hadElastic") {
-      //  std::cout << "Neutron interacted via: " << processName << std::endl;
-      //}
-    }
-	}*/
-
-  // if nothing happened during the hit return 0
+  // If nothing happened during the hit return 0, unless the
+	// particle is a gamma (for diagnostics) or if there are secondaries
   G4double energyDeposit = step->GetTotalEnergyDeposit();
-  if (energyDeposit == 0) return false;
+  if ((energyDeposit == 0) && (particleName != "gamma") && (secondaries->size() == 0)) return false;
 
   // define a new hit in the scintillator
   ScintillatorHit* newHit = new ScintillatorHit();
@@ -140,7 +138,18 @@ G4bool ScintillatorSD::ProcessHits(G4Step *step, G4TouchableHistory *ROhist)
   newHit->SetDetectorPosition(DetPosition);
   //newHit->SetParticleOriginTime();
   //newHit->SetParticleOriginPos();
-  
+
+	// Save gamma diagnostic information
+	bool hasSecondaryProton = false;
+  for (const auto& secondary : *secondaries) {
+		G4String secondaryName = secondary->GetDefinition()->GetParticleName();
+		if (secondaryName == "proton") hasSecondaryProton = true;
+  }
+  if ((particleName == "gamma") && hasSecondaryProton) {
+		newHit->SetTrackOriginVolumeName(step->GetTrack()->GetLogicalVolumeAtVertex()->GetName());
+		newHit->SetCreatorProcessName(step->GetTrack()->GetCreatorProcess()->GetProcessName());
+		newHit->SetParentID(step->GetTrack()->GetParentID());
+	}
 
   // add hit to hit collection
   fHitsCollection->insert(newHit);
@@ -164,6 +173,11 @@ G4bool ScintillatorSD::ProcessHits(G4Step *step, G4TouchableHistory *ROhist)
   newHitSum->SetDetEnergy(energyDeposit/MeV);
   newHitSum->SetCopyNumber(copyNumber);
   newHitSum->SetDetectorPosition(DetPosition);
+
+	// save diagnostic information to hit (this is not transfered to the output file)
+	newHitSum->SetTrackOriginVolumeName(step->GetTrack()->GetLogicalVolumeAtVertex()->GetName());
+	newHitSum->SetCreatorProcessName(step->GetTrack()->GetCreatorProcess()->GetProcessName());
+	newHitSum->SetParentID(step->GetTrack()->GetParentID());
 
 	// Add new hit
 	hitIDs.push_back(copyNumber);

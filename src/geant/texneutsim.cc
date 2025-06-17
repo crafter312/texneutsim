@@ -7,10 +7,12 @@
 #include "G4VisExecutive.hh"
 #include "G4UImanager.hh"
 
-#include "construction.hh"
-#include "physics.hh"
-#include "action.hh"
+#include "FTFP_INCLXX.hh"
+#include "G4EmStandardPhysics_option4.hh"
+#include "MENATE_R.hh"
 
+#include "construction.hh"
+#include "action.hh"
 
 int main(int argc, char** argv)
 {
@@ -29,7 +31,11 @@ int main(int argc, char** argv)
 
   
   runManager->SetUserInitialization(new MyDetectorConstruction());
-  runManager->SetUserInitialization(new MyPhysicsList());
+
+	G4VModularPhysicsList* physicsList = new FTFP_INCLXX;
+  physicsList->ReplacePhysics(new G4EmStandardPhysics_option4());
+  physicsList->ReplacePhysics(new MENATE_R());
+  runManager->SetUserInitialization(physicsList);
   runManager->SetUserInitialization(new MyActionInitialization());
 
 

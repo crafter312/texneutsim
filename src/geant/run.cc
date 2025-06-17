@@ -1,5 +1,13 @@
 #include "run.hh"
 
+#include "G4AblaInterface.hh"
+#include "G4AnalysisManager.hh"
+#include "G4HadronicInteraction.hh"
+#include "G4HadronicInteractionRegistry.hh"
+#include "G4INCLXXInterface.hh"
+#include "G4INCLXXInterfaceStore.hh"
+#include "G4RunManager.hh"
+
 MyRunAction::MyRunAction()
 {
 
@@ -27,36 +35,37 @@ MyRunAction::MyRunAction()
 
   // third root tree
   man->CreateNtuple("Scoring","Scoring");
-  man->CreateNtupleIColumn("fEvent");     // 0 
-  man->CreateNtupleIColumn("fIsPrimary"); // 1
-  man->CreateNtupleDColumn("fTime");      // 2
-  man->CreateNtupleDColumn("fInitialEnergy");    // 3
-  man->CreateNtupleDColumn("fDetEnergy");    // 3
-  man->CreateNtupleDColumn("fHitPosX");   // 4
-  man->CreateNtupleDColumn("fHitPosY");   // 5
-  man->CreateNtupleDColumn("fHitPosZ");   // 6
-  man->CreateNtupleDColumn("fDetPosX");   // 7
-  man->CreateNtupleDColumn("fDetPosY");   // 8
-  man->CreateNtupleDColumn("fDetPosZ");   // 9
-  man->CreateNtupleSColumn("fParticleName");  // 10
-  man->CreateNtupleIColumn("fCopyNumber"); // 11
+  man->CreateNtupleIColumn("fEvent");         // 0 
+  man->CreateNtupleIColumn("fIsPrimary");     // 1
+  man->CreateNtupleDColumn("fTime");          // 2
+  man->CreateNtupleDColumn("fInitialEnergy"); // 3
+  man->CreateNtupleDColumn("fDetEnergy");     // 4
+  man->CreateNtupleDColumn("fHitPosX");       // 5
+  man->CreateNtupleDColumn("fHitPosY");       // 6
+  man->CreateNtupleDColumn("fHitPosZ");       // 7
+  man->CreateNtupleDColumn("fDetPosX");       // 8
+  man->CreateNtupleDColumn("fDetPosY");       // 9
+  man->CreateNtupleDColumn("fDetPosZ");       // 10
+  man->CreateNtupleSColumn("fParticleName");  // 11
+  man->CreateNtupleIColumn("fCopyNumber");    // 12
   man->FinishNtuple(2);
 
 	// fourth root tree (for event-wise parameters)
 	man->CreateNtuple("Events","Events");
-	man->CreateNtupleIColumn("isNeutDet");                     // 0
-	man->CreateNtupleIColumn("neutHitMult");                   // 1
-	man->CreateNtupleIColumn("isNeutInVolume");                // 2
-	man->CreateNtupleIColumn("firstFrontInd");                 // 3
-	man->CreateNtupleIColumn("maxEdepInd");                    // 4
-	man->CreateNtupleIColumn("minTimeind");                    // 5
-	man->CreateNtupleIColumn("fEvent", event);                 // 6
-  man->CreateNtupleDColumn("fTime", time);                   // 7
-  man->CreateNtupleDColumn("fDetEnergy", detEnergy);         // 8
-	man->CreateNtupleIColumn("fCopyNumber", copyNumber);       // 9
-  man->CreateNtupleDColumn("fDetPosX", detPosX);             // 10
-  man->CreateNtupleDColumn("fDetPosY", detPosY);             // 11
-  man->CreateNtupleDColumn("fDetPosZ", detPosZ);             // 12
+	man->CreateNtupleIColumn("nMult");                   // 0
+	man->CreateNtupleIColumn("isNeutDet");               // 1
+	man->CreateNtupleIColumn("pSumMult");                // 2
+	man->CreateNtupleIColumn("isNeutInVolume");          // 3
+	man->CreateNtupleIColumn("firstFrontInd");           // 4
+	man->CreateNtupleIColumn("maxEdepInd");              // 5
+	man->CreateNtupleIColumn("minTimeind");              // 6
+	man->CreateNtupleIColumn("fEvent", event);           // 7
+  man->CreateNtupleDColumn("fTime", time);             // 8
+  man->CreateNtupleDColumn("fDetEnergy", detEnergy);   // 9
+	man->CreateNtupleIColumn("fCopyNumber", copyNumber); // 10
+  man->CreateNtupleDColumn("fDetPosX", detPosX);       // 11
+  man->CreateNtupleDColumn("fDetPosY", detPosY);       // 12
+  man->CreateNtupleDColumn("fDetPosZ", detPosZ);       // 13
 	man->FinishNtuple(3);
 }
 
@@ -65,6 +74,26 @@ MyRunAction::~MyRunAction()
 
 void MyRunAction::BeginOfRunAction(const G4Run* run)
 {
+  // Get hold of pointers to the INCL++ model interfaces
+	std::vector<G4HadronicInteraction*> interactions = G4HadronicInteractionRegistry::Instance()->FindAllModels(G4INCLXXInterfaceStore::GetInstance()->getINCLXXVersionName());
+	for(std::vector<G4HadronicInteraction*>::const_iterator iInter = interactions.begin(), e = interactions.end(); iInter!=e; ++iInter) {
+		G4INCLXXInterface *theINCLInterface = static_cast<G4INCLXXInterface*>(*iInter);
+		if (theINCLInterface) {
+
+			// Instantiate the ABLA model
+			G4HadronicInteraction* interaction = G4HadronicInteractionRegistry::Instance()->FindModel("ABLA");
+			G4AblaInterface* theAblaInterface = static_cast<G4AblaInterface*>(interaction);
+			if(!theAblaInterface)
+				theAblaInterface = new G4AblaInterface;
+
+			// Couple INCL++ to ABLA
+			G4cout << "Coupling INCLXX to ABLA" << G4endl;
+			theINCLInterface->SetDeExcitation(theAblaInterface);
+		}
+	}
+
+	//inform the runManager to save random number seed
+	G4RunManager::GetRunManager()->SetRandomNumberStore(false);
   G4AnalysisManager *man = G4AnalysisManager::Instance();
 
   G4int runID = run->GetRunID();
