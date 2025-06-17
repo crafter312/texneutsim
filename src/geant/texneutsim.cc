@@ -12,7 +12,6 @@
 #include "MENATE_R.hh"
 
 #include "construction.hh"
-#include "physics.hh"
 #include "action.hh"
 
 int main(int argc, char** argv)
@@ -37,7 +36,6 @@ int main(int argc, char** argv)
   physicsList->ReplacePhysics(new G4EmStandardPhysics_option4());
   physicsList->ReplacePhysics(new MENATE_R());
   runManager->SetUserInitialization(physicsList);
-	//runManager->SetUserInitialization(new MyPhysicsList());
   runManager->SetUserInitialization(new MyActionInitialization());
 
 
