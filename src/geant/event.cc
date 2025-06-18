@@ -5,7 +5,7 @@
 #include <limits>
 #include <vector>
 
-MyEventAction::MyEventAction(MyRunAction* _runAction)
+MyEventAction::MyEventAction(MyRunAction* _runAction, HistoManager& histo) : fHistoManager(histo)
 {
   fEdep = 0.;
 	fHasNeut = false;
@@ -152,6 +152,15 @@ void MyEventAction::EndOfEventAction(const G4Event *event)
 	man->FillNtupleIColumn(3,5,fMaxEdepInd);
 	man->FillNtupleIColumn(3,6,fMinTimeind);
 	man->AddNtupleRow(3);
+
+	/******** DIRECT ROOT INTEGRATION TESTING ********/
+
+	//fill histograms
+  fHistoManager.FillHisto(0, NNeut);
+  fHistoManager.FillHisto(1, NProtSum);
+  
+  //fill ntuple
+  fHistoManager.FillNtuple(NNeut, NProtSum);
 }
 
 void MyEventAction::AddEdep(G4double edep)

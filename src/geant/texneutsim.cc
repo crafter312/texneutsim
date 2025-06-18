@@ -12,55 +12,64 @@
 #include "MENATE_R.hh"
 
 #include "construction.hh"
-#include "action.hh"
+//#include "action.hh" // G4VUserActionInitialization class required for multi-threading
+#include "histomanager.hh"
+#include "generator.hh"
+#include "run.hh"
+#include "stepping.hh"
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
+	G4UIExecutive *ui = 0;
 
-  G4UIExecutive *ui = 0;
+	// This allows for multi or single thread depending on the build,
+	// but does not work if G4RunManager::SetUserAction is used.
+	//#ifdef G4MULTITHREADED
+	//	G4MTRunManager *runManager = new G4MTRunManager();
+	//#else
+		G4RunManager *runManager = new G4RunManager(); // comment all lines in this block EXCEPT this one for single core use
+	//#endif
 
-
-  
-
-  // this allows for multi or single thread depending on the build
-  //#ifdef G4MULTITHREADED
-  //  G4MTRunManager *runManager = new G4MTRunManager();
-  //#else
-    G4RunManager *runManager = new G4RunManager(); // comment all lines in this block EXCEPT this one for single core use
-  //#endif
-
-  
-  runManager->SetUserInitialization(new MyDetectorConstruction());
+	runManager->SetUserInitialization(new MyDetectorConstruction());
 
 	G4VModularPhysicsList* physicsList = new FTFP_INCLXX;
-  physicsList->ReplacePhysics(new G4EmStandardPhysics_option4());
-  physicsList->ReplacePhysics(new MENATE_R());
-  runManager->SetUserInitialization(physicsList);
-  runManager->SetUserInitialization(new MyActionInitialization());
+	physicsList->ReplacePhysics(new G4EmStandardPhysics_option4());
+	physicsList->ReplacePhysics(new MENATE_R());
+	runManager->SetUserInitialization(physicsList);
+	//runManager->SetUserInitialization(new MyActionInitialization());
 
+	// Single threaded setting of user action classes
+	HistoManager histo;
 
-  if(argc==1) {
-    ui = new G4UIExecutive(argc, argv);
-  }
+	MyPrimaryGenerator *generator = new MyPrimaryGenerator();
+	runManager->SetUserAction(generator);
 
-  G4VisManager *visManager = new G4VisExecutive();
-  visManager->Initialize();
+	MyRunAction *runAction = new MyRunAction(histo);
+	runManager->SetUserAction(runAction);
 
+	MyEventAction *eventAction = new MyEventAction(runAction, histo);
+	runManager->SetUserAction(eventAction);
 
-  G4UImanager *UImanager = G4UImanager::GetUIpointer();
+	MySteppingAction *steppingAction = new MySteppingAction(eventAction);
+	runManager->SetUserAction(steppingAction);
 
-  if(ui)
-  {
-    
-    UImanager->ApplyCommand("/control/execute vis.mac");
-    ui->SessionStart();
-  }
-  else
-  {
-    G4String command = "/control/execute ";
-    G4String fileName = argv[1];
-    UImanager->ApplyCommand(command+fileName);
-  }
+	if(argc==1) {
+		ui = new G4UIExecutive(argc, argv);
+	}
 
-  return 0;
+	G4VisManager *visManager = new G4VisExecutive();
+	visManager->Initialize();
+
+	G4UImanager *UImanager = G4UImanager::GetUIpointer();
+
+	if(ui) {
+		UImanager->ApplyCommand("/control/execute vis.mac");
+		ui->SessionStart();
+	}
+	else {
+		G4String command = "/control/execute ";
+		G4String fileName = argv[1];
+		UImanager->ApplyCommand(command+fileName);
+	}
+
+	return 0;
 }

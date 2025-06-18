@@ -8,7 +8,7 @@
 #include "G4INCLXXInterfaceStore.hh"
 #include "G4RunManager.hh"
 
-MyRunAction::MyRunAction()
+MyRunAction::MyRunAction(HistoManager& histo) : fHistoManager(histo)
 {
 
   G4AnalysisManager *man = G4AnalysisManager::Instance();
@@ -103,6 +103,7 @@ void MyRunAction::BeginOfRunAction(const G4Run* run)
 
   man->OpenFile("texneutsim-output_run" + strRunID.str() + ".root");
 
+	fHistoManager.Book();
 }
 
 void MyRunAction::EndOfRunAction(const G4Run*)
@@ -112,6 +113,8 @@ void MyRunAction::EndOfRunAction(const G4Run*)
   man->Write();
   man->CloseFile();
 
+	fHistoManager.PrintStatistic();
+  fHistoManager.Save();
 }
 
 void MyRunAction::Clear()

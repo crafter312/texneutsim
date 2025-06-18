@@ -10,12 +10,13 @@
 
 #include "G4AnalysisManager.hh"
 
+#include "histomanager.hh"
 #include "run.hh"
 
 class MyEventAction : public G4UserEventAction
 {
   public:
-    MyEventAction(MyRunAction*);
+    MyEventAction(MyRunAction*, HistoManager&);
     ~MyEventAction();
 
     virtual void BeginOfEventAction(const G4Event*);
@@ -25,6 +26,8 @@ class MyEventAction : public G4UserEventAction
 		void ToggleNeutron() { fHasNeut = true; }
 
   private:
+		HistoManager& fHistoManager;
+
     G4double fEdep;
 		bool fHasNeut;
 		G4int fFirstFrontInd; // index in neutron hit vectors of the first hit in the front layer, in hit order
