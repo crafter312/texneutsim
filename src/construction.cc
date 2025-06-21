@@ -207,7 +207,11 @@ void MyDetectorConstruction::ConstructScintillator()
   G4double xspacing=2.86258*cm;
   G4double zspacing=4.13766*cm;
 
-  G4double xoffset = (imax-1)*xspacing/2.;
+	const G4double inch   = 2.54*cm;
+	G4double xcentersplit = 3.382*inch;
+	G4double xcenterdiff  = xcentersplit - xspacing;
+
+  G4double xoffset = (((imax - 1) * xspacing) + xcenterdiff) / 2.;
   G4double yoffset = 0.;
   G4double zoffset = -0.025*m;
 
@@ -257,8 +261,8 @@ void MyDetectorConstruction::ConstructScintillator()
   //i=Rows, j=Columns
   for(G4int i=0; i<imax; i++){ 
     for(G4int j=0; j<jmax; j++){
-      housing_loc.setX(i*xspacing-xoffset);
-      housing_loc.setZ(j*zspacing-zoffset);
+      housing_loc.setX((i*xspacing)+((i>((imax-1)/2))*xcenterdiff)-xoffset);
+      housing_loc.setZ((j*zspacing)-zoffset);
       new G4PVPlacement(housing_rot,housing_loc,fHousing_log,"phys_Housing", logicWorld,false,i+j*(jmax-1),checkGeometry);	
       
     }
@@ -297,7 +301,7 @@ void MyDetectorConstruction::ConstructScintillator()
         Rotation->rotateY(0*deg);
         Rotation->rotateZ(90*deg);	
    
-        G4ThreeVector pad_loc = G4ThreeVector(i*xspacing-xoffset,(-fScint_x+fPad_x)/2+(fCube_x+fPad_x)*k,j*zspacing-zoffset);
+        G4ThreeVector pad_loc = G4ThreeVector((i*xspacing)+((i>((imax-1)/2))*xcenterdiff)-xoffset,(-fScint_x+fPad_x)/2+(fCube_x+fPad_x)*k,(j*zspacing)-zoffset);
         pad = new G4PVPlacement(Rotation,pad_loc,fPad_log,
                                 "pad_phys", logicWorld,
                                 false,k+j*(fCube_mult+1)+i*(jmax*(fCube_mult+1)),checkGeometry);
@@ -344,7 +348,7 @@ void MyDetectorConstruction::ConstructScintillator()
       
         scintCopyNo = k+j*(fCube_mult+1)+i*(jmax*(fCube_mult+1));
 
-        G4ThreeVector cube_loc = G4ThreeVector(i*xspacing-xoffset,-fScint_x/2+fCube_x/2+fPad_x+(fCube_x+fPad_x)*k,j*zspacing-zoffset);
+        G4ThreeVector cube_loc = G4ThreeVector((i*xspacing)+((i>((imax-1)/2))*xcenterdiff)-xoffset,-fScint_x/2+fCube_x/2+fPad_x+(fCube_x+fPad_x)*k,(j*zspacing)-zoffset);
         cube_phys = new G4PVPlacement(0,cube_loc,fScint_log,"scintillator",logicWorld,false,scintCopyNo,checkGeometry);
         
         copyPositions[scintCopyNo] = cube_loc;
@@ -442,9 +446,9 @@ void MyDetectorConstruction::ConstructScintillator()
         if(k==0) sign=1;
         else sign=-1;
       
-        G4ThreeVector fMuMetal_loc = G4ThreeVector(i*xspacing-xoffset,
+        G4ThreeVector fMuMetal_loc = G4ThreeVector((i*xspacing)+((i>((imax-1)/2))*xcenterdiff)-xoffset,
                                                     -sign*fScint_x+sign*fCube_x-sign*fPad_x*(fCube_mult/2+0.5),
-                                                    j*zspacing-zoffset);
+                                                    (j*zspacing)-zoffset);
 
         G4RotationMatrix* mu_rotation = new G4RotationMatrix();
         mu_rotation->rotateX(90*deg);
@@ -498,8 +502,8 @@ void MyDetectorConstruction::ConstructScintillator()
   for(G4int i=0; i<imax; i++){ 
     for(G4int j=0; j<jmax; j++){ 
       
-      fPmt_loc1 = G4ThreeVector(i*xspacing-xoffset,-fScint_x/2.-height_pmt,j*zspacing-zoffset);
-      fPmt_loc2 = G4ThreeVector(i*xspacing-xoffset, fScint_x/2.+height_pmt,j*zspacing-zoffset); 
+      fPmt_loc1 = G4ThreeVector((i*xspacing)+((i>((imax-1)/2))*xcenterdiff)-xoffset,-fScint_x/2.-height_pmt,(j*zspacing)-zoffset);
+      fPmt_loc2 = G4ThreeVector((i*xspacing)+((i>((imax-1)/2))*xcenterdiff)-xoffset, fScint_x/2.+height_pmt,(j*zspacing)-zoffset); 
       
       new G4PVPlacement(pmt_rm1,fPmt_loc1,fPmt_log,"pmt",logicWorld,
                             false,0+j*(fCube_mult+1)+i*(jmax*(fCube_mult+1)),checkGeometry);

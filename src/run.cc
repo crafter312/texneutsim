@@ -8,7 +8,7 @@
 #include "G4INCLXXInterfaceStore.hh"
 #include "G4RunManager.hh"
 
-MyRunAction::MyRunAction()
+MyRunAction::MyRunAction(Li6sim_alphapn& sim) : fLi6Sim(sim)
 {
 
   G4AnalysisManager *man = G4AnalysisManager::Instance();
@@ -102,7 +102,6 @@ void MyRunAction::BeginOfRunAction(const G4Run* run)
   strRunID << runID;
 
   man->OpenFile("texneutsim-output_run" + strRunID.str() + ".root");
-
 }
 
 void MyRunAction::EndOfRunAction(const G4Run*)
@@ -112,6 +111,7 @@ void MyRunAction::EndOfRunAction(const G4Run*)
   man->Write();
   man->CloseFile();
 
+	fLi6Sim.DoFinalThings(G4RunManager::GetRunManager()->GetCurrentRun()->GetNumberOfEventToBeProcessed());
 }
 
 void MyRunAction::Clear()

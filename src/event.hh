@@ -12,10 +12,13 @@
 
 #include "run.hh"
 
+#include "rootoutput.h"
+#include "Li6sim_alphapn.h"
+
 class MyEventAction : public G4UserEventAction
 {
   public:
-    MyEventAction(MyRunAction*);
+    MyEventAction(MyRunAction*, Li6sim_alphapn&, RootOutput&);
     ~MyEventAction();
 
     virtual void BeginOfEventAction(const G4Event*);
@@ -25,6 +28,9 @@ class MyEventAction : public G4UserEventAction
 		void ToggleNeutron() { fHasNeut = true; }
 
   private:
+		Li6sim_alphapn& fLi6Sim;
+		RootOutput& fOutput;
+
     G4double fEdep;
 		bool fHasNeut;
 		G4int fFirstFrontInd; // index in neutron hit vectors of the first hit in the front layer, in hit order

@@ -1,5 +1,5 @@
 # ignore all files in any directory named build
-build/
+build/*
 
 # ignore all ROOT files
 *.root
@@ -9,5 +9,8 @@ CMakeCache.txt
 CMakeFiles/*
 Makefile
 cmake_install.cmake
+li6sim-prefix/*
+lib/Li6sim-build/*
+libLI6SIM*.*
 
 texneutsim
