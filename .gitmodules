@@ -1,3 +1,6 @@
 [submodule "lib/MENATE_R"]
 	path = lib/MENATE_R
 	url = git@github.com:crafter312/MENATE_R.git
+[submodule "lib/Li6sim"]
+	path = lib/Li6sim
+	url = git@github.com:crafter312/WashU6LiSim.git
