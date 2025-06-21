@@ -11,5 +11,6 @@ Makefile
 cmake_install.cmake
 li6sim-prefix/*
 lib/Li6sim-build/*
+libLI6SIM*.*
 
 texneutsim

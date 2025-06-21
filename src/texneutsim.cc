@@ -1,6 +1,9 @@
 #include <iostream>
 #include <string>
 
+#include "TSystem.h"
+#include "TInterpreter.h"
+
 #include "G4RunManager.hh"
 #include "G4MTRunManager.hh"
 #include "G4UIExecutive.hh"
@@ -22,6 +25,11 @@
 using namespace std;
 
 int main(int argc, char** argv) {
+
+	// Make sure dictionary is properly linked and stuff
+	G4cout << string(SOFILE) << G4endl;
+	gSystem->Load(SOFILE);
+	TInterpreter::Instance()->AddIncludePath(PCMFILE);
 
 	G4RunManager *runManager = new G4RunManager();
 	runManager->SetUserInitialization(new MyDetectorConstruction());
