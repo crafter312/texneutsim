@@ -10,13 +10,15 @@
 
 #include "G4AnalysisManager.hh"
 
-#include "histomanager.hh"
 #include "run.hh"
+
+#include "rootoutput.h"
+#include "Li6sim_alphapn.h"
 
 class MyEventAction : public G4UserEventAction
 {
   public:
-    MyEventAction(MyRunAction*, HistoManager&);
+    MyEventAction(MyRunAction*, Li6sim_alphapn&, RootOutput&);
     ~MyEventAction();
 
     virtual void BeginOfEventAction(const G4Event*);
@@ -26,7 +28,8 @@ class MyEventAction : public G4UserEventAction
 		void ToggleNeutron() { fHasNeut = true; }
 
   private:
-		HistoManager& fHistoManager;
+		Li6sim_alphapn& fLi6Sim;
+		RootOutput& fOutput;
 
     G4double fEdep;
 		bool fHasNeut;

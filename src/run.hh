@@ -1,7 +1,7 @@
 #ifndef RUN_HH
 #define RUN_HH
 
-#include "histomanager.hh"
+#include "Li6sim_alphapn.h"
 
 #include "G4UserRunAction.hh"
 #include "G4Run.hh"
@@ -11,7 +11,7 @@
 class MyRunAction : public G4UserRunAction
 {
   public:
-    MyRunAction(HistoManager&);
+    MyRunAction(Li6sim_alphapn&);
     ~MyRunAction();
 
     virtual void BeginOfRunAction(const G4Run*);
@@ -23,7 +23,7 @@ class MyRunAction : public G4UserRunAction
 		size_t GetSize() { return event.size(); }
 
 	private:
-		HistoManager& fHistoManager;
+		Li6sim_alphapn& fLi6Sim;
 
 		std::vector<G4int> event;
 		std::vector<G4double> time;

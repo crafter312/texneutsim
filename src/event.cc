@@ -1,11 +1,14 @@
 #include "event.hh"
+
 #include "scinthit.hh"
 #include "scinthit_psum.hh"
+
+#include "G4RunManager.hh"
 
 #include <limits>
 #include <vector>
 
-MyEventAction::MyEventAction(MyRunAction* _runAction, HistoManager& histo) : fHistoManager(histo)
+MyEventAction::MyEventAction(MyRunAction* _runAction, Li6sim_alphapn& sim, RootOutput& out) : fLi6Sim(sim), fOutput(out)
 {
   fEdep = 0.;
 	fHasNeut = false;
@@ -18,7 +21,7 @@ MyEventAction::MyEventAction(MyRunAction* _runAction, HistoManager& histo) : fHi
 MyEventAction::~MyEventAction()
 {}
 
-void MyEventAction::BeginOfEventAction(const G4Event*)
+void MyEventAction::BeginOfEventAction(const G4Event *event)
 {
   fEdep = 0.;
 	fHasNeut = false;
@@ -26,6 +29,14 @@ void MyEventAction::BeginOfEventAction(const G4Event*)
 	fMaxEdepInd = -1;
 	fMinTimeind = -1; 
 	runAction->Clear();
+
+	// Print progress
+	G4int index = event->GetEventID();
+	G4int Nevents = G4RunManager::GetRunManager()->GetCurrentRun()->GetNumberOfEventToBeProcessed();
+	if(index%1000 == 0) G4cout <<	index << " of " << Nevents << G4endl;
+
+	// Execute contents of charged particle simulation event loop
+	fLi6Sim.DoSingleEvent(fOutput);
 }
 
 void MyEventAction::EndOfEventAction(const G4Event *event)
@@ -152,15 +163,6 @@ void MyEventAction::EndOfEventAction(const G4Event *event)
 	man->FillNtupleIColumn(3,5,fMaxEdepInd);
 	man->FillNtupleIColumn(3,6,fMinTimeind);
 	man->AddNtupleRow(3);
-
-	/******** DIRECT ROOT INTEGRATION TESTING ********/
-
-	//fill histograms
-  fHistoManager.FillHisto(0, NNeut);
-  fHistoManager.FillHisto(1, NProtSum);
-  
-  //fill ntuple
-  fHistoManager.FillNtuple(NNeut, NProtSum);
 }
 
 void MyEventAction::AddEdep(G4double edep)
