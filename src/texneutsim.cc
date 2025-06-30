@@ -31,8 +31,12 @@ int main(int argc, char** argv) {
 	gSystem->Load(SOFILE);
 	TInterpreter::Instance()->AddIncludePath(PCMFILE);
 
+	// Some simulation parameters
+	const G4double inch = 2.54*cm;     // custom inch conversion
+	G4double flangeDist = 18.969*inch; // distance between downstream side of target frame and upstream side of flange cover
+
 	G4RunManager *runManager = new G4RunManager();
-	runManager->SetUserInitialization(new MyDetectorConstruction());
+	runManager->SetUserInitialization(new MyDetectorConstruction(flangeDist));
 
 	// Initialize physics list
 	G4VModularPhysicsList* physicsList = new FTFP_INCLXX;
@@ -52,12 +56,20 @@ int main(int argc, char** argv) {
 	double distanceFromTarget = 150;       // distance of Gobbi from the target in mm
 	string suffix             = "alphapn"; // output file suffix
 
+	// Distance between downstream side of target frame and center of first layer of TexNeut. This is flangeDist + a 3 inch
+	// margin for the beam pipe joint, the scintillator housing wall thickness, and half the scintillator dimension. NOTE 
+	// THAT flangeDist MUST BE CHANGED TO REFLECT THE SMALL DISTANCE BETWEEN THE CENTER OF THE TARGET AND THE DOWNSTREAM
+	// SIDE OF THE TARGET FRAME, ONCE THAT VALUE IS KNOWN. See construction.cc for detailed TexNeut dimensions.
+	G4double texNeutDistance = flangeDist + 3*inch + 1.0635*cm;
+
 	// Initialize main simulation class
 	Li6sim_alphapn sim(Ebeam, distanceFromTarget, Ex, gamma, suffix);
 	//sim.AddExtraSuffix("perfTarg_noResolution2");
 
 	// See Li6sim.h for default experiment parameters, which can
 	// be changed via "Set..." commands as desired here.
+	const bool hasNeutron = true;
+	sim.SetEnableExternalNeutron(hasNeutron);
 
 	// Complete initialization of simulation class
 	sim.Init();
@@ -66,16 +78,16 @@ int main(int argc, char** argv) {
 	sim.PrintSettings();
 
 	// Initialize output manager
-	RootOutput output(sim.GetSuffix(), sim.GetNFrags()-1); // -1 because neutron output handled separately
+	RootOutput output(sim.GetSuffix(), sim.GetNFrags(), hasNeutron);
 
 	// Single threaded setting of user action classes
-	MyPrimaryGenerator *generator = new MyPrimaryGenerator();
+	MyPrimaryGenerator *generator = new MyPrimaryGenerator(sim, output);
 	runManager->SetUserAction(generator);
 
 	MyRunAction *runAction = new MyRunAction(sim);
 	runManager->SetUserAction(runAction);
 
-	MyEventAction *eventAction = new MyEventAction(runAction, sim, output);
+	MyEventAction *eventAction = new MyEventAction(runAction, sim, texNeutDistance, output);
 	runManager->SetUserAction(eventAction);
 
 	MySteppingAction *steppingAction = new MySteppingAction(eventAction);

@@ -130,8 +130,8 @@ G4bool ScintillatorSD::ProcessHits(G4Step *step, G4TouchableHistory *ROhist)
   newHit->SetEvent(evt);
   newHit->SetIsPrimary(parentID);
   newHit->SetTime(track->GetGlobalTime());
-  newHit->SetInitialEnergy(originationEnergy/MeV);
-  newHit->SetDetEnergy(energyDeposit/MeV);
+  newHit->SetInitialEnergy(originationEnergy*MeV);
+  newHit->SetDetEnergy(energyDeposit*MeV);
   newHit->SetParticleName(particleName);
   newHit->SetCopyNumber(copyNumber);
   newHit->SetHitPosition(HitPosition);
@@ -162,15 +162,15 @@ G4bool ScintillatorSD::ProcessHits(G4Step *step, G4TouchableHistory *ROhist)
 	// search for already existing hit, increment if found
 	for (size_t i = 0; i < hitIDs.size(); i++) {
 		if (copyNumber != hitIDs[i]) continue;
-		((ScintillatorHitPSum*)fPSumHitsCollection->GetHit(i))->IncrementE(energyDeposit/MeV);
+		((ScintillatorHitPSum*)fPSumHitsCollection->GetHit(i))->IncrementE(energyDeposit*MeV);
 		return true;
 	}
 
   // make new hit if one with the relevant copy number doesn't already exist
 	ScintillatorHitPSum* newHitSum = new ScintillatorHitPSum();
 	newHitSum->SetEvent(evt);
-  newHitSum->SetTime(track->GetGlobalTime());
-  newHitSum->SetDetEnergy(energyDeposit/MeV);
+  newHitSum->SetTime(track->GetGlobalTime()*ns);
+  newHitSum->SetDetEnergy(energyDeposit*MeV);
   newHitSum->SetCopyNumber(copyNumber);
   newHitSum->SetDetectorPosition(DetPosition);
 

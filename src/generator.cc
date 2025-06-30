@@ -1,6 +1,6 @@
 #include "generator.hh"
 
-MyPrimaryGenerator::MyPrimaryGenerator()
+MyPrimaryGenerator::MyPrimaryGenerator(Li6sim_alphapn& sim, RootOutput& out) : fLi6Sim(sim), fOutput(out)
 {
   fParticleGun = new G4ParticleGun(1);// define the number of primary particles created per event
 
@@ -25,6 +25,8 @@ MyPrimaryGenerator::~MyPrimaryGenerator()
 
 void MyPrimaryGenerator::GeneratePrimaries(G4Event *anEvent)
 {
+  // First, run initial portion of charged particle simulation
+	fLi6Sim.DoSingleEventPreNeutron(fOutput);
 
   G4ParticleDefinition *particle = fParticleGun->GetParticleDefinition();
 
@@ -95,6 +97,10 @@ void MyPrimaryGenerator::GeneratePrimaries(G4Event *anEvent)
     fParticleGun->SetParticleDefinition(particle);
 
   }
+
+	// GET NEUTRON INFORMATION FROM CHARGED PARTICLE SIM HERE
+	// Maybe put inside if statement using the external neutron flag from the simulation class
+	// Will need to add getter functions to the simulation class
 
   fParticleGun->GeneratePrimaryVertex(anEvent); // tell geant4 to generate the primary vertex
 }

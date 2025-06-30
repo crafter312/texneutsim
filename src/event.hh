@@ -18,7 +18,7 @@
 class MyEventAction : public G4UserEventAction
 {
   public:
-    MyEventAction(MyRunAction*, Li6sim_alphapn&, RootOutput&);
+    MyEventAction(MyRunAction*, Li6sim_alphapn&, G4double, RootOutput&);
     ~MyEventAction();
 
     virtual void BeginOfEventAction(const G4Event*);
@@ -30,6 +30,8 @@ class MyEventAction : public G4UserEventAction
   private:
 		Li6sim_alphapn& fLi6Sim;
 		RootOutput& fOutput;
+
+		G4double fTexNeutDistance; // distance between center of target and center of first layer of TexNeut
 
     G4double fEdep;
 		bool fHasNeut;

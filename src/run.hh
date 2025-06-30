@@ -17,6 +17,11 @@ class MyRunAction : public G4UserRunAction
     virtual void BeginOfRunAction(const G4Run*);
     virtual void EndOfRunAction(const G4Run*);
 
+		G4double GetTime(int i) { return time[i]; }
+		G4double GetX(int i) { return detPosX[i]; }
+		G4double GetY(int i) { return detPosY[i]; }
+		G4double GetZ(int i) { return detPosZ[i]; }
+
 		// Vector management functions
 		void Clear();
 		void FillVectors(G4int, G4double, G4double, G4int, G4double, G4double, G4double);
