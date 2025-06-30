@@ -1,6 +1,6 @@
 #include "construction.hh"
 
-MyDetectorConstruction::MyDetectorConstruction(G4double flange) : fFlangeDist(flange)
+MyDetectorConstruction::MyDetectorConstruction(G4double flange, G4double dist) : fFlangeDist(flange), fTexNeutDist(dist)
 {
   fMessenger = new G4GenericMessenger(this, "/detector/", "Detector Construction");
 
@@ -15,7 +15,7 @@ MyDetectorConstruction::MyDetectorConstruction(G4double flange) : fFlangeDist(fl
   // size of the world volume
   xWorld = .75*m;
   yWorld = .75*m;
-  zWorld = .75*m;
+  zWorld = fTexNeutDist*m;
 }
 
 MyDetectorConstruction::~MyDetectorConstruction()

@@ -20,7 +20,7 @@
 class MyPrimaryGenerator : public G4VUserPrimaryGeneratorAction
 {
   public:
-    MyPrimaryGenerator(Li6sim_alphapn&, RootOutput&);
+    MyPrimaryGenerator(Li6sim_alphapn&, G4double, G4double, RootOutput&);
     ~MyPrimaryGenerator();
 
     virtual void GeneratePrimaries(G4Event*);
@@ -28,6 +28,9 @@ class MyPrimaryGenerator : public G4VUserPrimaryGeneratorAction
   private:
 		Li6sim_alphapn& fLi6Sim;
 		RootOutput& fOutput;
+
+		G4double fTexNeutDistance; // distance between center of target and center of first layer of TexNeut
+		G4double targetThickness;  // in cm
 
     G4ParticleGun *fParticleGun;
     G4ThreeVector fConeAxis;

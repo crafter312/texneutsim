@@ -1,6 +1,6 @@
 #include "generator.hh"
 
-MyPrimaryGenerator::MyPrimaryGenerator(Li6sim_alphapn& sim, RootOutput& out) : fLi6Sim(sim), fOutput(out)
+MyPrimaryGenerator::MyPrimaryGenerator(Li6sim_alphapn& sim, G4double dist, G4double thickness, RootOutput& out) : fLi6Sim(sim), fOutput(out), fTexNeutDistance(dist), targetThickness(thickness)
 {
   fParticleGun = new G4ParticleGun(1);// define the number of primary particles created per event
 
@@ -98,9 +98,34 @@ void MyPrimaryGenerator::GeneratePrimaries(G4Event *anEvent)
 
   }
 
-	// GET NEUTRON INFORMATION FROM CHARGED PARTICLE SIM HERE
-	// Maybe put inside if statement using the external neutron flag from the simulation class
-	// Will need to add getter functions to the simulation class
+	// Get neutron information from charged particle simulation, if external neutron is enabled
+	if(fLi6Sim.GetEnableExternalNeutron()) {
+
+		// Z position from random target offset
+		G4double inthick = fLi6Sim.GetTargetInThick(); // fractional position of interaction inside target
+		G4double offset  = (targetThickness * inthick) - (targetThickness / 2.);
+		G4double zpos    = -fTexNeutDistance + offset;
+
+		// Set position, make sure units match what is returned by fLi6Sim
+		G4ThreeVector sourcePosition = G4ThreeVector(
+			fLi6Sim.GetXTarget()*mm,
+			fLi6Sim.GetYTarget()*mm,
+			zpos // units should be supplied by the relevant constructor input values (i.e. external to this class)
+		);
+		fParticleGun->SetParticlePosition(sourcePosition);
+
+		// Set direction
+		G4ThreeVector sourceDirection = G4ThreeVector(
+			fLi6Sim.GetNeutVX(),
+			fLi6Sim.GetNeutVY(),
+			fLi6Sim.GetNeutVZ()
+		);
+		sourceDirection = sourceDirection.unit();
+		fParticleGun->SetParticleMomentumDirection(sourceDirection);
+
+		// Set energy, make sure units match what is returned by fLi6Sim
+		fParticleGun->SetParticleEnergy(fLi6Sim.GetNeutE()*MeV);
+	}
 
   fParticleGun->GeneratePrimaryVertex(anEvent); // tell geant4 to generate the primary vertex
 }
