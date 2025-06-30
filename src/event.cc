@@ -8,7 +8,7 @@
 #include <limits>
 #include <vector>
 
-MyEventAction::MyEventAction(MyRunAction* _runAction, Li6sim_alphapn& sim, RootOutput& out) : fLi6Sim(sim), fOutput(out)
+MyEventAction::MyEventAction(MyRunAction* _runAction, Li6sim_alphapn& sim, G4double dist, RootOutput& out) : fLi6Sim(sim), fOutput(out), fTexNeutDistance(dist)
 {
   fEdep = 0.;
 	fHasNeut = false;
@@ -34,9 +34,6 @@ void MyEventAction::BeginOfEventAction(const G4Event *event)
 	G4int index = event->GetEventID();
 	G4int Nevents = G4RunManager::GetRunManager()->GetCurrentRun()->GetNumberOfEventToBeProcessed();
 	if(index%1000 == 0) G4cout <<	index << " of " << Nevents << G4endl;
-
-	// Execute contents of charged particle simulation event loop
-	fLi6Sim.DoSingleEvent(fOutput);
 }
 
 void MyEventAction::EndOfEventAction(const G4Event *event)
@@ -163,6 +160,16 @@ void MyEventAction::EndOfEventAction(const G4Event *event)
 	man->FillNtupleIColumn(3,5,fMaxEdepInd);
 	man->FillNtupleIColumn(3,6,fMinTimeind);
 	man->AddNtupleRow(3);
+
+	// Pass neutron information into charged particle simulation
+	if(fMinTimeind>=0)
+	fLi6Sim.SetExternalNeutronValues(
+		runAction->GetTime(fMinTimeind)/ns,
+		runAction->GetX(fMinTimeind)/cm,
+		runAction->GetY(fMinTimeind)/cm,
+		(runAction->GetZ(fMinTimeind) + fTexNeutDistance)/cm
+	);
+	fLi6Sim.DoSingleEventPostNeutron(fOutput);
 }
 
 void MyEventAction::AddEdep(G4double edep)

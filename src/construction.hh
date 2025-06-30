@@ -34,7 +34,7 @@
 class MyDetectorConstruction : public G4VUserDetectorConstruction
 {
   public:
-    MyDetectorConstruction(); // constructor
+    MyDetectorConstruction(G4double, G4double); // constructor
     ~MyDetectorConstruction(); // destructor
 
     G4LogicalVolume *GetScoringVolume() const { return fScoringVolume; }
@@ -63,6 +63,9 @@ class MyDetectorConstruction : public G4VUserDetectorConstruction
 		G4LogicalVolume *fCountingVolume;
 
     G4double xWorld,yWorld,zWorld;
+
+		G4double fFlangeDist;  // distance between downstream side of target frame and upstream side of flange cover
+		G4double fTexNeutDist; // distance between center of target and center of first layer of TexNeut
 
     G4double fCube_mult;
     G4int imax;

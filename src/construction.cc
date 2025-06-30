@@ -1,6 +1,6 @@
 #include "construction.hh"
 
-MyDetectorConstruction::MyDetectorConstruction()
+MyDetectorConstruction::MyDetectorConstruction(G4double flange, G4double dist) : fFlangeDist(flange), fTexNeutDist(dist)
 {
   fMessenger = new G4GenericMessenger(this, "/detector/", "Detector Construction");
 
@@ -15,7 +15,7 @@ MyDetectorConstruction::MyDetectorConstruction()
   // size of the world volume
   xWorld = .75*m;
   yWorld = .75*m;
-  zWorld = .75*m;
+  zWorld = fTexNeutDist*m;
 }
 
 MyDetectorConstruction::~MyDetectorConstruction()
@@ -212,8 +212,7 @@ void MyDetectorConstruction::ConstructScintillator()
 	G4double xcenterdiff  = xcentersplit - xspacing;
 
   G4double xoffset = (((imax - 1) * xspacing) + xcenterdiff) / 2.;
-  G4double yoffset = 0.;
-  G4double zoffset = -0.025*m;
+  G4double zoffset = 0.; // was -0.025*m
 
   G4double fD_mtl = 0.0635*cm;
 

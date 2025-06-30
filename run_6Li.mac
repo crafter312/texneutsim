@@ -1,5 +1,7 @@
 /run/numberOfThreads 4
 /run/initialize
 
-/gun/energy 10 MeV
-/run/beamOn 10000
+# With the merged simulation, the energy is determined by the charged particle simulation
+# results and cannot be set from a macro. Instead, the beam energy is hardcoded in texneutsim.cc.
+#/gun/energy 10 MeV
+/run/beamOn 1000000
