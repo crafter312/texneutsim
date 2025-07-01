@@ -27,7 +27,8 @@ using namespace std;
 int main(int argc, char** argv) {
 
 	// Make sure dictionary is properly linked and stuff
-	G4cout << string(SOFILE) << G4endl;
+	G4cout << "Loading simlib shared library from: " << string(SOFILE) << G4endl;
+	G4cout << "Loading simlib ROOT dictionary from: " << string(PCMFILE) << G4endl;
 	gSystem->Load(SOFILE);
 	TInterpreter::Instance()->AddIncludePath(PCMFILE);
 
@@ -61,7 +62,7 @@ int main(int argc, char** argv) {
 
 	// Other default values
 	double Ex                 = 5.366;     // excitation energy of parent fragment in MeV
-	double gamma              = 0.541;     // width of excited state of parent fragment in MeV
+	double gamma              = 0.;        // width of excited state of parent fragment in MeV 0.541
 	double distanceFromTarget = 90;        // distance of Gobbi from the target in mm
 	string suffix             = "alphapn"; // output file suffix
 	const bool hasNeutron     = true;      // flag to tell charged particle simulation that the neutron is simulated elsewhere

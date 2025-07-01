@@ -130,7 +130,7 @@ void MyEventAction::EndOfEventAction(const G4Event *event)
 
 	// More diagnostic output
 	if((NNeut == 0) && (NProtSum>0)) {
-		bool hasOutputHeader = false;
+		//bool hasOutputHeader = false;
 		for (size_t i = 0; i < hitsCollection->entries(); ++i) {
 			ScintillatorHit* hit2 = (*hitsCollection)[i];
 			if ((hit2->GetParticleName() == "gamma") && (hit2->GetParentID() != -1)) {

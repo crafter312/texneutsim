@@ -28,21 +28,26 @@ PhotocathodeSD::PhotocathodeSD(G4String name) : G4VSensitiveDetector(name)
 PhotocathodeSD::~PhotocathodeSD()
 {}
 
-G4bool PhotocathodeSD::ProcessHits(G4Step *aStep, G4TouchableHistory *ROhist)
+G4bool PhotocathodeSD::ProcessHits(G4Step *aStep, G4TouchableHistory*)
 { 
   G4Track *track = aStep->GetTrack(); // this allows us to track our particle in the sensitive detector
 
   //track->SetTrackStatus(fStopAndKill);
 
+  /* Note from Henry Webb:
+   * I've commented out some of the unused variables below to remove warnings during compilation,
+   * so make sure to uncomment them if needed in the future.
+   */
+
   G4StepPoint *preStepPoint = aStep->GetPreStepPoint(); // when the photon enters the detector
-  G4StepPoint *postStepPoint = aStep->GetPostStepPoint(); // when the photon leaves the detector
+  //G4StepPoint *postStepPoint = aStep->GetPostStepPoint(); // when the photon leaves the detector
 
   G4double time = preStepPoint->GetGlobalTime();
 
   const G4VTouchable *touchable = aStep->GetPreStepPoint()->GetTouchable();
 
   // get the detector ID for the detector that was hit
-  G4int copyNo = touchable->GetCopyNumber();
+  //G4int copyNo = touchable->GetCopyNumber();
 
   // get the position of the detector that was hit
   G4VPhysicalVolume *physVol = touchable->GetVolume();

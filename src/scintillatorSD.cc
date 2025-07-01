@@ -28,7 +28,7 @@ void ScintillatorSD::Initialize(G4HCofThisEvent *hce)
 }
 
 
-G4bool ScintillatorSD::ProcessHits(G4Step *step, G4TouchableHistory *ROhist)
+G4bool ScintillatorSD::ProcessHits(G4Step *step, G4TouchableHistory*)
 { 
 	// Get the event number
 	G4int evt = G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
@@ -62,7 +62,7 @@ G4bool ScintillatorSD::ProcessHits(G4Step *step, G4TouchableHistory *ROhist)
 			//std::cout << "Number of secondaries: " << secondaries->size() << std::endl;
 			for (const auto& secondary : *secondaries) {
 				auto secondaryName = secondary->GetDefinition()->GetParticleName();
-				auto secondaryEnergy = secondary->GetKineticEnergy();
+				//auto secondaryEnergy = secondary->GetKineticEnergy();
 				//std::cout << "Secondary: " << secondaryName 
 				//          << ", Energy: " << secondaryEnergy / MeV << " MeV" << std::endl;
 			}
@@ -88,7 +88,7 @@ G4bool ScintillatorSD::ProcessHits(G4Step *step, G4TouchableHistory *ROhist)
   ScintillatorHit* newHit = new ScintillatorHit();
 
   // Get particle and parent information
-  G4int trackID = track->GetTrackID();   // ID of this particle
+  //G4int trackID = track->GetTrackID();   // ID of this particle
   G4int parentID = track->GetParentID(); // Parent ID
   //G4Track *decayTrack = track->GetParentTrack(parentID);
   //G4cout << "trackID " << trackID << ", parentID " << parentID  << ", particleName " << particleName << G4endl;
@@ -109,8 +109,8 @@ G4bool ScintillatorSD::ProcessHits(G4Step *step, G4TouchableHistory *ROhist)
   // get the energy of origination of partilce
   G4double originationEnergy = track->GetVertexKineticEnergy(); 
 
-  G4double psptime = step->GetPreStepPoint()->GetGlobalTime();
-  G4double gtime = track->GetGlobalTime();
+  //G4double psptime = step->GetPreStepPoint()->GetGlobalTime();
+  //G4double gtime = track->GetGlobalTime();
 
   //if(parentID==0) {
   /*
