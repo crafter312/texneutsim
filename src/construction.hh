@@ -48,7 +48,8 @@ class MyDetectorConstruction : public G4VUserDetectorConstruction
     G4Tubs *fPhotocath,*fPmt,*fMuShield_tub;
     G4LogicalVolume *logicWorld, *logicRadiator, *logicDetector, 
                     *fScint_log,*fHousing_log,*fPmt_log,*fPhotocath_log,
-                    *fMuShield_log,*fPad_log, *fCounter_log;
+                    *fMuShield_log,*fPad_log, *fCounter_log,
+                    *fFlangeCover_log, *fVacuum_log;
     G4VPhysicalVolume *physWorld, *physRadiator, *physDetector, 
                       *cube_phys,*fmuMetal_phys,*pad;
 

@@ -15,7 +15,7 @@ MyDetectorConstruction::MyDetectorConstruction(G4double flange, G4double dist) :
   // size of the world volume
   xWorld = .75*m;
   yWorld = .75*m;
-  zWorld = fTexNeutDist*m;
+  zWorld = fTexNeutDist;
 }
 
 MyDetectorConstruction::~MyDetectorConstruction()
@@ -211,6 +211,9 @@ void MyDetectorConstruction::ConstructScintillator()
 	G4double xcentersplit = 3.382*inch;
 	G4double xcenterdiff  = xcentersplit - xspacing;
 
+	G4double flangeThickness = 1.*inch;
+	G4double flangeRadius    = 9.*inch;
+
   G4double xoffset = (((imax - 1) * xspacing) + xcenterdiff) / 2.;
   G4double zoffset = 0.; // was -0.025*m
 
@@ -228,7 +231,6 @@ void MyDetectorConstruction::ConstructScintillator()
   G4double fScint_y = fCube_y;
   G4double fScint_z = fCube_z;
 
-
   G4double housing_x = fScint_x-fPad_x*2;
   G4double housing_y = fScint_y+2.*fD_mtl;
   G4double housing_z = fScint_z+2.*fD_mtl;
@@ -241,9 +243,23 @@ void MyDetectorConstruction::ConstructScintillator()
 
 	///////////////////////////// Neutron counter
 	G4ThreeVector counter_loc = G4ThreeVector(0.,0.,-zoffset-(housing_z/2.)-(counter_z/2.));
-	G4Box* fCounter_box = new G4Box("Counter Box",counter_x/2.,counter_y/2.,counter_z/2.);
+	G4Box* fCounter_box = new G4Box("counter_box",counter_x/2.,counter_y/2.,counter_z/2.);
 	fCounter_log = new G4LogicalVolume(fCounter_box,worldMat,"counter_log",0,0,0);
 	new G4PVPlacement(0,counter_loc,fCounter_log,"phys_Counter", logicWorld,false,0,checkGeometry);
+
+	///////////////////////////// Vacuum chamber flange cover
+	// Note that fFlangeDist should be correctly adjusted for the target thickness
+	G4ThreeVector flangeCover_loc = G4ThreeVector(0.,0.,-fTexNeutDist+fFlangeDist+(flangeThickness/2.));
+	G4Tubs* fFlangeCover_cyl = new G4Tubs("flangeCover_cyl",0.,flangeRadius,flangeThickness/2.,0.,360.);
+	fFlangeCover_log = new G4LogicalVolume(fFlangeCover_cyl,Al,"flangeCover_log",0,0,0);
+	new G4PVPlacement(0,flangeCover_loc,fFlangeCover_log,"phys_FlangeCover", logicWorld,false,0,checkGeometry);
+
+	///////////////////////////// Vacuum chamber vacuum
+	// Note that fFlangeDist should be corrected for the target distance if that information is available
+	G4ThreeVector vacuum_loc = G4ThreeVector(0.,0.,-fTexNeutDist+(fFlangeDist/2.));
+	G4Tubs* fVacuum_cyl = new G4Tubs("vacuum_cyl",0.,flangeRadius,fFlangeDist/2.,0.,360.);
+	fVacuum_log = new G4LogicalVolume(fVacuum_cyl,Vacuum,"vacuum_log",0,0,0);
+	new G4PVPlacement(0,vacuum_loc,fVacuum_log,"phys_Vacuum", logicWorld,false,0,checkGeometry);
 
   ///////////////////////////// Housing
   G4Box* outerBox = new G4Box("Outer Box",housing_x/2.,housing_y/2.,housing_z/2.);
@@ -598,5 +614,11 @@ void MyDetectorConstruction::VisAttributes()
 
 	G4VisAttributes* counter_va = new G4VisAttributes(G4Colour(1.,1.,0.)); // yellow
 	fCounter_log->SetVisAttributes(counter_va);
+
+	G4VisAttributes* flangeCover_va = new G4VisAttributes(G4Colour(1.,1.,1.)); // white
+	fFlangeCover_log->SetVisAttributes(flangeCover_va);
+
+	G4VisAttributes* vacuum_va = new G4VisAttributes(G4Colour(1.,1.,1.)); // white
+	fVacuum_log->SetVisAttributes(vacuum_va);
 }
 
