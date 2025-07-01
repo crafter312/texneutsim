@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
 
 	// Other default values
 	double Ex                 = 5.366;     // excitation energy of parent fragment in MeV
-	double gamma              = 0.541;     // width of excited state of parent fragment in MeV
+	double gamma              = 0.;        // width of excited state of parent fragment in MeV 0.541
 	double distanceFromTarget = 90;        // distance of Gobbi from the target in mm
 	string suffix             = "alphapn"; // output file suffix
 	const bool hasNeutron     = true;      // flag to tell charged particle simulation that the neutron is simulated elsewhere
