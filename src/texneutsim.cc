@@ -27,7 +27,8 @@ using namespace std;
 int main(int argc, char** argv) {
 
 	// Make sure dictionary is properly linked and stuff
-	G4cout << string(SOFILE) << G4endl;
+	G4cout << "Loading simlib shared library from: " << string(SOFILE) << G4endl;
+	G4cout << "Loading simlib ROOT dictionary from: " << string(PCMFILE) << G4endl;
 	gSystem->Load(SOFILE);
 	TInterpreter::Instance()->AddIncludePath(PCMFILE);
 

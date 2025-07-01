@@ -286,7 +286,8 @@ void MyDetectorConstruction::ConstructScintillator()
   
   // define the housing skin
   G4OpticalSurface *housingSkin = new G4OpticalSurface("housingSkin");
-  G4LogicalSkinSurface *housingSurface = new G4LogicalSkinSurface("housingSkin",fHousing_log,housingSkin);
+  //G4LogicalSkinSurface *housingSurface =
+  new G4LogicalSkinSurface("housingSkin",fHousing_log,housingSkin);
   housingSkin->SetType(dielectric_metal);
   housingSkin->SetFinish(polishedvm2000air);
   housingSkin->SetModel(glisur);
@@ -324,7 +325,8 @@ void MyDetectorConstruction::ConstructScintillator()
         //Surface properties for the optical pad
         G4OpticalSurface* padSkin = new G4OpticalSurface("PadSkin");
 
-        G4LogicalSkinSurface* padSurface = new G4LogicalSkinSurface("PadSkin",fPad_log,padSkin);
+        //G4LogicalSkinSurface* padSurface =
+        new G4LogicalSkinSurface("PadSkin",fPad_log,padSkin);
 
         padSkin->SetType(dielectric_dielectric);
         padSkin->SetFinish(polished);
@@ -374,7 +376,8 @@ void MyDetectorConstruction::ConstructScintillator()
         G4OpticalSurface* cubeSkin = new G4OpticalSurface("cubeSkin");
 
         //G4LogicalSkinSurface* abc = new G4LogicalSkinSurface("cubeSkin",fScint_log,cubeSkin);
-        G4LogicalBorderSurface *cubeSurface = new G4LogicalBorderSurface("cubeSkin",cube_phys,physWorld,cubeSkin);
+        //G4LogicalBorderSurface *cubeSurface =
+        new G4LogicalBorderSurface("cubeSkin",cube_phys,physWorld,cubeSkin);
 
         cubeSkin->SetType(dielectric_dielectric);
         cubeSkin->SetFinish(groundair);
@@ -478,7 +481,8 @@ void MyDetectorConstruction::ConstructScintillator()
         // define the mumetal skin
         G4OpticalSurface* muSkin = new G4OpticalSurface("muSkin");
 
-        G4LogicalSkinSurface *muSurface = new G4LogicalSkinSurface("muSkin",fMuShield_log,muSkin);
+        //G4LogicalSkinSurface *muSurface =
+        new G4LogicalSkinSurface("muSkin",fMuShield_log,muSkin);
         muSkin->SetType(dielectric_metal);
         muSkin->SetFinish(polished);
         muSkin->SetModel(glisur);

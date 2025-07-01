@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Geant4 REQUIRED ui_all vis_all)
 
 # Locate ROOT package
-find_package(ROOT REQUIRED COMPONENTS RIO Tree Hist)
+find_package(ROOT 6 QUIET CONFIG REQUIRED COMPONENTS RIO Tree Hist)
 
 include(${Geant4_USE_FILE})
 
