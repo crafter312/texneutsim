@@ -101,7 +101,7 @@ void MyRunAction::BeginOfRunAction(const G4Run* run)
   std::stringstream strRunID;
   strRunID << runID;
 
-  man->OpenFile("texneutsim-output_run" + strRunID.str() + ".root");
+  man->OpenFile("texneutsim" + fLi6Sim.GetSuffix() + "_run" + strRunID.str() + ".root");
 }
 
 void MyRunAction::EndOfRunAction(const G4Run*)
