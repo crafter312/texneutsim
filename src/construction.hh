@@ -40,6 +40,8 @@ class MyDetectorConstruction : public G4VUserDetectorConstruction
     G4LogicalVolume *GetScoringVolume() const { return fScoringVolume; }
 		G4LogicalVolume *GetCountingVolume() const { return fCountingVolume; }
 
+		G4double GetTexNeutDist() const { return fTexNeutDist; }
+
     virtual G4VPhysicalVolume *Construct(); // this is the main function that constructs the detector geometry
     
   private:
@@ -63,9 +65,16 @@ class MyDetectorConstruction : public G4VUserDetectorConstruction
     G4LogicalVolume *fScoringVolume;
 		G4LogicalVolume *fCountingVolume;
 
+		G4double fD_mtl; // housing wall thickness
+
+		// scintillating cube dimensions
+		G4double fCube_x;
+		G4double fCube_y;
+		G4double fCube_z;
+
     G4double xWorld,yWorld,zWorld;
 
-		G4double fFlangeDist;  // distance between downstream side of target frame and upstream side of flange cover
+		G4double fFlangeDist;  // distance between center of target and upstream side of flange cover
 		G4double fTexNeutDist; // distance between center of target and center of first layer of TexNeut
 
     G4double fCube_mult;

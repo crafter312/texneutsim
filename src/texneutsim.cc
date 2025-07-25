@@ -36,17 +36,17 @@ int main(int argc, char** argv) {
 	const G4double inch = 2.54*cm;     // custom inch conversion
 	G4double flangeDist = 18.969*inch; // distance between downstream side of target frame and upstream side of flange cover
 
-	// Distance between downstream side of target frame and center of first layer of TexNeut. This is flangeDist + a 3 inch
-	// margin for the beam pipe joint, the scintillator housing wall thickness, and half the scintillator dimension. NOTE 
-	// THAT flangeDist MUST BE CHANGED TO REFLECT THE SMALL DISTANCE BETWEEN THE CENTER OF THE TARGET AND THE DOWNSTREAM
-	// SIDE OF THE TARGET FRAME, ONCE THAT VALUE IS KNOWN. See construction.cc for detailed TexNeut dimensions.
-	G4double texNeutDistance = flangeDist + 3*inch + 1.0635*cm;
+	// NOTE THAT flangeDist NEEDS TO BE CORRECTED FOR THE TINY DISTANCE BETWEEN THE DOWNSTREAM SIDE OF THE TARGET
+	// FRAME AND THE CENTER OF THE TARGET, ONCE THAT DISTANCE IS KNOWN. This does not affect the geometry of the
+	// simulation, I'm pretty sure, except for the placement of the target relative to everything else will be
+	// ever so slightly off.
 
-	float thickness = 3.026;                  // 12C target thickness in mg/cm^2 (copied from Nic's experiment)
+	float thickness = 0.;                     // 12C target thickness in mg/cm^2 (3.026 is copied from Nic's experiment)
 	float thick_cm  = (thickness / 2260.)*cm; // 12C target thickness in cm (divide by graphite density of 2260 mg/cm^3)
 
 	G4RunManager *runManager = new G4RunManager();
-	runManager->SetUserInitialization(new MyDetectorConstruction(flangeDist, texNeutDistance + (thick_cm/2)));
+	MyDetectorConstruction *detectorConstruction = new MyDetectorConstruction(flangeDist, thick_cm);
+	runManager->SetUserInitialization(detectorConstruction);
 
 	// Initialize physics list
 	G4VModularPhysicsList* physicsList = new FTFP_INCLXX;
@@ -69,13 +69,14 @@ int main(int argc, char** argv) {
 
 	// Initialize main simulation class
 	Li6sim_alphapn sim(Ebeam, distanceFromTarget, Ex, gamma, suffix);
-	//sim.AddExtraSuffix("neutsigma1ns");
+	sim.AddExtraSuffix("neutsigma0-1ns");
 
 	// See Li6sim.h for default experiment parameters, which can
 	// be changed via "Set..." commands as desired here.
 	sim.SetEnableExternalNeutron(hasNeutron);
 	sim.SetTargetThickness(thickness);
-	//sim.SetNeutTRes(1.); // 0.5 default
+	sim.SetNeutTRes(0.1); // 0.5 by default
+	sim.SetUseRealP(true); // false by default, does perfect charged particle reconstruction
 
 	// Complete initialization of simulation class
 	sim.Init();
@@ -87,13 +88,13 @@ int main(int argc, char** argv) {
 	RootOutput output(sim.GetSuffix(), sim.GetNFrags(), hasNeutron);
 
 	// Single threaded setting of user action classes
-	MyPrimaryGenerator *generator = new MyPrimaryGenerator(sim, texNeutDistance, thick_cm, output);
+	MyPrimaryGenerator *generator = new MyPrimaryGenerator(sim, detectorConstruction->GetTexNeutDist(), thick_cm, output);
 	runManager->SetUserAction(generator);
 
 	MyRunAction *runAction = new MyRunAction(sim);
 	runManager->SetUserAction(runAction);
 
-	MyEventAction *eventAction = new MyEventAction(runAction, sim, texNeutDistance, output);
+	MyEventAction *eventAction = new MyEventAction(runAction, sim, detectorConstruction->GetTexNeutDist(), output);
 	runManager->SetUserAction(eventAction);
 
 	MySteppingAction *steppingAction = new MySteppingAction(eventAction);
