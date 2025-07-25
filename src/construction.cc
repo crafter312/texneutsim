@@ -1,6 +1,6 @@
 #include "construction.hh"
 
-MyDetectorConstruction::MyDetectorConstruction(G4double flange, G4double dist) : fFlangeDist(flange), fTexNeutDist(dist)
+MyDetectorConstruction::MyDetectorConstruction(G4double flange, G4double targ_thick) : fFlangeDist(flange)
 {
   fMessenger = new G4GenericMessenger(this, "/detector/", "Detector Construction");
 
@@ -12,10 +12,30 @@ MyDetectorConstruction::MyDetectorConstruction(G4double flange, G4double dist) :
 
   DefineMaterials();
 
-  // size of the world volume
+  //// size of the world volume and required dependency dimensions
+
+	// housing wall thickness
+	fD_mtl = 0.0635*cm;
+
+	// scintillating cube dimensions
+  fCube_x = 2.0*cm;
+  fCube_y = 2.0*cm;
+  fCube_z = 2.0*cm;
+
+	const G4double inch = 2.54*cm; // custom inch conversion
+
+	// Assuming fFlangeDist is the distance between the center of the target and the upstream side of the flange cover,
+	// this gives the distance between the center of the target and the center of the first layer of TexNeut. The
+	// 3 inches is the distance between the upstream side of the flange and the front of the first TexNeut layer.
+	fTexNeutDist = fFlangeDist + 3*inch + (fCube_z * 0.5) + fD_mtl;
+
+	// I think that fFlangeDist not being totally correct does not affect the geometrical positions of things in this
+	// simulation. This is because both fTexNeutDist and fFlangeDist contain the same error, so most of the time this
+	// error cancels out.
+
   xWorld = .75*m;
   yWorld = .75*m;
-  zWorld = fTexNeutDist;
+  zWorld = fTexNeutDist + (targ_thick * 0.5); // account for other half of target
 }
 
 MyDetectorConstruction::~MyDetectorConstruction()
@@ -217,11 +237,8 @@ void MyDetectorConstruction::ConstructScintillator()
   G4double xoffset = (((imax - 1) * xspacing) + xcenterdiff) / 2.;
   G4double zoffset = 0.; // was -0.025*m
 
-  G4double fD_mtl = 0.0635*cm;
-
-  G4double fCube_x = 2.0*cm;
-  G4double fCube_y = 2.0*cm;
-  G4double fCube_z = 2.0*cm;
+	// Housing wall thickness and scintillator cube dimensions were here,
+	// now are member variables defined in the constructor.
 
   G4double fPad_x = 0.1*cm;
   G4double fPad_y = fCube_y;
