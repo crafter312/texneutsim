@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
 	// simulation, I'm pretty sure, except for the placement of the target relative to everything else will be
 	// ever so slightly off.
 
-	float thickness = 0.;                     // 12C target thickness in mg/cm^2 (3.026 is copied from Nic's experiment)
+	float thickness = 3.026;                  // 12C target thickness in mg/cm^2 (3.026 is copied from Nic's experiment)
 	float thick_cm  = (thickness / 2260.)*cm; // 12C target thickness in cm (divide by graphite density of 2260 mg/cm^3)
 
 	G4RunManager *runManager = new G4RunManager();
@@ -69,15 +69,15 @@ int main(int argc, char** argv) {
 
 	// Initialize main simulation class
 	Li6sim_alphapn sim(Ebeam, distanceFromTarget, Ex, gamma, suffix);
-	sim.AddExtraSuffix("neutsigma0-1ns_0targ");
+	sim.AddExtraSuffix("neutsigma0-1ns");
 
 	// See Li6sim.h for default experiment parameters, which can
 	// be changed via "Set..." commands as desired here.
 	sim.SetEnableExternalNeutron(hasNeutron);
 	sim.SetTargetThickness(thickness);
 	sim.SetNeutTRes(.1); // 0.5 by default
-	//sim.SetUseRealP(true); // false by default, does perfect fragment reconstruction
-	//sim.SetUseRealNeut(true); // false by default, does perfect neutron reconstruction
+	sim.SetUseRealP(true); // false by default, does perfect fragment reconstruction
+	sim.SetUseRealNeut(true); // false by default, does perfect neutron reconstruction
 
 	// Complete initialization of simulation class
 	sim.Init();
