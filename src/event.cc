@@ -54,10 +54,15 @@ void MyEventAction::EndOfEventAction(const G4Event *event)
 
   // loop over all hits and write them out to disk
 	int NNeut = 0;
+	G4double C12MinTime = std::numeric_limits<double>::max();
   for (size_t i = 0; i < hitsCollection->entries(); ++i) {
     ScintillatorHit* hit = (*hitsCollection)[i];
 
 		if(hit->GetParticleName() == "") continue;
+
+		// find earliest time C12 recoil hit
+		if((hit->GetParticleName() == "C12") && (hit->GetTime() < C12MinTime))
+			C12MinTime = hit->GetTime();
 
 		// save all hits
     man->FillNtupleIColumn(2,0,hit->GetEvent());
@@ -164,6 +169,7 @@ void MyEventAction::EndOfEventAction(const G4Event *event)
 	// Pass neutron information into charged particle simulation
 	if(fMinTimeind>=0)
 	fLi6Sim.SetExternalNeutronValues(
+		C12MinTime < timeMin,
 		runAction->GetTime(fMinTimeind)/ns,
 		runAction->GetX(fMinTimeind)/cm,
 		runAction->GetY(fMinTimeind)/cm,
