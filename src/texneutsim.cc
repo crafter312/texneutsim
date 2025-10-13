@@ -41,9 +41,9 @@ int main(int argc, char** argv) {
 	// simulation, I'm pretty sure, except for the placement of the target relative to everything else will be
 	// ever so slightly off.
 
-	float thickness = 17.575;                 // 12C target thickness in mg/cm^2 (3.026 is copied from Nic's experiment), currently diamond
-	//float thick_cm  = (thickness / 2260.)*cm; // 12C target thickness in cm (divide by graphite density of 2260 mg/cm^3)
-	float thick_cm  = (thickness / 3515.)*cm; // 12C target thickness in cm (divide by graphite density of 3515 mg/cm^3)
+	float thickness = 17.575;                   // 12C target thickness in mg/cm^2 (3.026 is copied from Nic's experiment), currently diamond
+	float density = 3515.;                      // 12C target density in mg/cm^3 (graphite 2260., diamond 3515.)
+	float thick_cm  = (thickness / density)*cm; // 12C target thickness in cm
 
 	G4RunManager *runManager = new G4RunManager();
 	MyDetectorConstruction *detectorConstruction = new MyDetectorConstruction(flangeDist, thick_cm);
@@ -63,22 +63,22 @@ int main(int argc, char** argv) {
 
 	// Other default values
 	double Ex                 = 5.366;     // excitation energy of parent fragment in MeV
-	double gamma              = 0.541;     // width of excited state of parent fragment in MeV (should be 0.541)
-	double distanceFromTarget = 90;        // distance of Gobbi from the target in mm
+	double gamma              = 0.;        // width of excited state of parent fragment in MeV (should be 0.541)
+	double distanceFromTarget = 90;        // distance of Gobbi from the target center in mm
 	string suffix             = "alphapn"; // output file suffix
 	const bool hasNeutron     = true;      // flag to tell charged particle simulation that the neutron is simulated elsewhere
 
 	// Initialize main simulation class
 	Li6sim_alphapn sim(Ebeam, distanceFromTarget, Ex, gamma, suffix);
-	sim.AddExtraSuffix("neutsigma0-5ns_diamond_targrecon");
+	sim.AddExtraSuffix("neutsigma0-1ns_diamond_targrecon");
 
 	// See Li6sim.h for default experiment parameters, which can
 	// be changed via "Set..." commands as desired here.
 	sim.SetEnableExternalNeutron(hasNeutron);
-	sim.SetTargetThickness(thickness);
-	//sim.SetNeutTRes(.1); // 0.5 by default
-	//sim.SetUseRealP(true); // false by default, does perfect fragment reconstruction
-	//sim.SetUseRealNeut(true); // false by default, does perfect neutron reconstruction
+	sim.SetTargetThickness(thickness, density); // thickness in mg/cm^2, density in mg/cm^3
+	sim.SetNeutTRes(.1); // 0.5 by default
+	sim.SetUseRealP(true); // false by default, does perfect fragment reconstruction
+	sim.SetUseRealNeut(true); // false by default, does perfect neutron reconstruction
 
 	// Complete initialization of simulation class
 	sim.Init();
