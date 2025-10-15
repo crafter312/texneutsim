@@ -14,7 +14,7 @@ void targElossTestPoints() {
 
 	// Read file and TTree
 	string path = "";
-	string ifname = "sim_alphapn_56MeV_90mm_neutsigma0-5ns_diamond_targrecon";
+	string ifname = "sim_alphapn_56MeV_90mm_zeroWidth_neutsigma0-1ns_diamond_targrecon_real_realNeut";
 	size_t numentries;
 	TFile *file = TFile::Open((path + ifname + ".root").c_str());
 	if (!file || file->IsZombie()) {
@@ -48,7 +48,7 @@ void targElossTestPoints() {
 	// Skip to desired entry
 	for (int i = 0;;) {
 		if (!myReader.Next()) break;
-		if (!(*isFragDet) || !(*isNeutHit) || (((*inthick)-(*inthickrecimp)) > -0.5)) continue;
+		if (!(*isFragDet) || !(*isNeutHit)) continue; // || (((*inthick)-(*inthickrecimp)) > -0.5)
 		if (i == 0) break;
 		i++; 
 	}
@@ -81,8 +81,9 @@ void targElossTestPoints() {
 	// Invert target energy loss function and calculate target reaction position
 	double inthickreconimproved = min(max(((*dETarg) - elossFit.GetParameter(1)) / elossFit.GetParameter(0), 0.), (double)thickness);
 	cout << "Real target Eloss: " << (*dETarg) << endl;
-	cout << "Simulation reconstructed difference: " << ((*inthick)-(*inthickrecimp)) << endl;
-	cout << "Macro reconstructed difference: " << ((*inthick)-inthickreconimproved) << endl;
+	cout << "Sampled target reaction position: " << (*inthick) << endl;
+	cout << "Simulation reconstructed position: " << (*inthickrecimp) << endl;
+	cout << "Macro reconstructed position: " << inthickreconimproved << endl;
 
 	c->SaveAs("target_eloss_test_points.png");
 
