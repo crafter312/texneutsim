@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 
+#include <Math/MinimizerOptions.h>
+
 #include "TSystem.h"
 #include "TInterpreter.h"
 
@@ -31,6 +33,9 @@ int main(int argc, char** argv) {
 	G4cout << "Loading simlib ROOT dictionary from: " << string(PCMFILE) << G4endl;
 	gSystem->Load(SOFILE);
 	TInterpreter::Instance()->AddIncludePath(PCMFILE);
+
+	// Default minimizer
+	ROOT::Math::MinimizerOptions::SetDefaultMinimizer("Minuit", "Migrad");
 
 	// Some simulation parameters
 	const G4double inch = 2.54*cm;     // custom inch conversion
@@ -63,22 +68,22 @@ int main(int argc, char** argv) {
 
 	// Other default values
 	double Ex                 = 5.366;     // excitation energy of parent fragment in MeV
-	double gamma              = 0.541;     // width of excited state of parent fragment in MeV (should be 0.541)
+	double gamma              = 0.;        // width of excited state of parent fragment in MeV (should be 0.541)
 	double distanceFromTarget = 90;        // distance of Gobbi from the target center in mm
 	string suffix             = "alphapn"; // output file suffix
 	const bool hasNeutron     = true;      // flag to tell charged particle simulation that the neutron is simulated elsewhere
 
 	// Initialize main simulation class
 	Li6sim_alphapn sim(Ebeam, distanceFromTarget, Ex, gamma, suffix);
-	sim.AddExtraSuffix("neutsigma0-5ns_diamond_targrecon");
+	sim.AddExtraSuffix("neutsigma0-1ns_diamond_targrecon");
 
 	// See Li6sim.h for default experiment parameters, which can
 	// be changed via "Set..." commands as desired here.
 	sim.SetEnableExternalNeutron(hasNeutron);
 	sim.SetTargetThickness(thickness, density); // thickness in mg/cm^2, density in mg/cm^3
-	//sim.SetNeutTRes(.1); // 0.5 by default
-	//sim.SetUseRealP(true); // false by default, does perfect fragment reconstruction
-	//sim.SetUseRealNeut(true); // false by default, does perfect neutron reconstruction
+	sim.SetNeutTRes(.1); // 0.5 by default
+	sim.SetUseRealP(true); // false by default, does perfect fragment reconstruction
+	sim.SetUseRealNeut(true); // false by default, does perfect neutron reconstruction
 
 	// Complete initialization of simulation class
 	sim.Init();
