@@ -36,6 +36,9 @@ void targElossTestPoints() {
 
 	// Create TTreeReader
 	TTreeReader myReader("t", file);
+	TTreeReaderValue<double> dETarg(myReader, "targEloss");
+	TTreeReaderValue<double> inthick(myReader, "inthick");
+	TTreeReaderValue<double> inthickrecimp(myReader, "inthickrecimp");
 	TTreeReaderValue<bool> isFragDet(myReader, "isFragDet");
 	TTreeReaderValue<bool> isNeutHit(myReader, "isNeutHit");
 	TTreeReaderValue<vector<double>> dETests(myReader, "dETests");
@@ -45,8 +48,8 @@ void targElossTestPoints() {
 	// Skip to desired entry
 	for (int i = 0;;) {
 		if (!myReader.Next()) break;
-		if (!(*isFragDet) || !(*isNeutHit)) continue;
-		if (i == 2000) break;
+		if (!(*isFragDet) || !(*isNeutHit) || (((*inthick)-(*inthickrecimp)) > -0.5)) continue;
+		if (i == 0) break;
 		i++; 
 	}
 
@@ -65,6 +68,21 @@ void targElossTestPoints() {
 	TGraph g(n, x, y);
 	g.SetTitle("Target Eloss Test Points;Reaction position (mg/cm^{2});Energy loss (MeV)");
 	g.Draw("AC*");
+
+	// Linear fit to target total energy loss function
+	TF1 elossFit("linear", "([0]*x)+[1]");
+	elossFit.SetParName(0, "Slope");
+	elossFit.SetParName(1, "Intercept");
+	elossFit.SetRange(-0.1, thickness+0.1);
+
+	g.Fit(&elossFit, "NRQ", "", -0.1, thickness+0.1);
+	elossFit.Draw("same");
+
+	// Invert target energy loss function and calculate target reaction position
+	double inthickreconimproved = min(max(((*dETarg) - elossFit.GetParameter(1)) / elossFit.GetParameter(0), 0.), (double)thickness);
+	cout << "Real target Eloss: " << (*dETarg) << endl;
+	cout << "Simulation reconstructed difference: " << ((*inthick)-(*inthickrecimp)) << endl;
+	cout << "Macro reconstructed difference: " << ((*inthick)-inthickreconimproved) << endl;
 
 	c->SaveAs("target_eloss_test_points.png");
 
