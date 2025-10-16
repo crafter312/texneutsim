@@ -43,7 +43,7 @@ void targElossTestPoints() {
 	TTreeReaderValue<bool> isNeutHit(myReader, "isNeutHit");
 	TTreeReaderValue<vector<double>> dETests(myReader, "dETests");
 
-	TCanvas* c = new TCanvas("c", "Canvas", 800, 600);
+	TCanvas* canv = new TCanvas("c", "Canvas", 800, 600);
 
 	// Skip to desired entry
 	for (int i = 0;;) {
@@ -69,22 +69,34 @@ void targElossTestPoints() {
 	g.SetTitle("Target Eloss Test Points;Reaction position (mg/cm^{2});Energy loss (MeV)");
 	g.Draw("AC*");
 
-	// Linear fit to target total energy loss function
-	TF1 elossFit("linear", "([0]*x)+[1]");
-	elossFit.SetParName(0, "Slope");
-	elossFit.SetParName(1, "Intercept");
+	// Quadratic fit to target total energy loss function
+	TF1 elossFit("quadratic", "([0]*x*x)+([1]*x)+[2]");
 	elossFit.SetRange(-0.1, thickness+0.1);
+	elossFit.SetParameter(0, 1);
+	elossFit.SetParLimits(0, 0, 1);
 
 	g.Fit(&elossFit, "NRQ", "", -0.1, thickness+0.1);
 	elossFit.Draw("same");
 
 	// Invert target energy loss function and calculate target reaction position
-	double inthickreconimproved = min(max(((*dETarg) - elossFit.GetParameter(1)) / elossFit.GetParameter(0), 0.), (double)thickness);
+	//double inthickreconimproved = ((*dETarg) - elossFit.GetParameter(1)) / elossFit.GetParameter(0); // for linear fit
+
+	double a = elossFit.GetParameter(0);
+	cout << "a: " << a << endl;
+	double b = elossFit.GetParameter(1);
+	double c = elossFit.GetParameter(2) - (*dETarg);
+	double disc = (b*b) - (4. * a * c);
+	if (disc < 0) {
+		cout << "Discriminant < 0, something went very wrong!" << endl;
+		return;
+	}
+	double inthickreconimproved = 0.5 * (-b + sqrt(disc)) / a;
+	inthickreconimproved = min(max(inthickreconimproved, 0.), (double)thickness); // clamp value to within target dimensions
 	cout << "Real target Eloss: " << (*dETarg) << endl;
 	cout << "Sampled target reaction position: " << (*inthick) << endl;
 	cout << "Simulation reconstructed position: " << (*inthickrecimp) << endl;
 	cout << "Macro reconstructed position: " << inthickreconimproved << endl;
 
-	c->SaveAs("target_eloss_test_points.png");
+	canv->SaveAs("target_eloss_test_points.png");
 
 }
