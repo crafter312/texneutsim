@@ -3,6 +3,8 @@ build/*
 
 # ignore all ROOT files
 *.root
+*.png
+*.eps
 
 # ignore cmake files
 CMakeCache.txt
