@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
 
 	// Initialize main simulation class
 	Li6sim_alphapn sim(Ebeam, distanceFromTarget, Ex, gamma, suffix);
-	sim.AddExtraSuffix("neutsigma0-5ns_diamond100keV_loss0-005step");
+	sim.AddExtraSuffix("neutsigma0-5ns_diamond100keV_loss0-005step_recoil");
 
 	// See Li6sim.h for default experiment parameters, which can
 	// be changed via "Set..." commands as desired here.
