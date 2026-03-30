@@ -75,12 +75,13 @@ int main(int argc, char** argv) {
 
 	// Initialize main simulation class
 	Li6sim_alphapn sim(Ebeam, distanceFromTarget, Ex, gamma, suffix);
-	sim.AddExtraSuffix("neutsigma0-5ns_diamond100keV_loss0-005step_recoil");
+	//sim.AddExtraSuffix("neutsigma0-5ns_diamond100keV_loss0-005step_0-5recoil");
 
 	// See Li6sim.h for default experiment parameters, which can
 	// be changed via "Set..." commands as desired here.
 	sim.SetEnableExternalNeutron(hasNeutron);
 	sim.SetTargetThickness(thickness, density); // thickness in mg/cm^2, density in mg/cm^3
+	sim.SetRecoilQuenchingFactor(0.5); // quenching factor of target nuclide, between 0 and 1 (0 by default for no quenching)
 	//sim.SetNeutTRes(1.); // 0.5 by default
 	//sim.SetDiamondResFWHM(.1); // 0.1 MeV by default
 	//sim.SetUseRealP(true); // false by default, does perfect fragment reconstruction
