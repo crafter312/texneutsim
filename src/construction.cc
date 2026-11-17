@@ -70,7 +70,7 @@ void MyDetectorConstruction::DefineMaterials()
 
   // setup the refractive properties of the aerogel
   // 1.239841939 is the conversion from nm to eV
-  G4double energy[2] = {1.239841939*eV/0.2, 1.239841939*eV/0.9};
+  G4double energy[2] = {1.239841939*eV/0.9,1.239841939*eV/0.2};
   G4double rindexAerogel[2] = {1.1,1.1};
   G4double rindexWorld[2] = {1.,1.};
   G4double rindexNaI[2] = {1.78,1.78};
